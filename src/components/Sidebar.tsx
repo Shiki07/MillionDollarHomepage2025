@@ -64,11 +64,11 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
       <div className="flex flex-wrap gap-4 items-center justify-between">
         <div className="flex gap-4">
           <div className="text-center">
-            <div className="text-lg font-bold text-primary">3</div>
+            <div className="text-lg font-bold text-primary">0</div>
             <div className="text-xs text-muted-foreground">Pixels Sold</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-accent">$30.00</div>
+            <div className="text-lg font-bold text-accent">$0.00</div>
             <div className="text-xs text-muted-foreground">Revenue</div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <ImageIcon className="w-4 h-4" />
-              <span>Hold Shift and drag to select pixel areas</span>
+              <span>Hold Shift and drag to select pixel areas • Minimum 10x10 pixels ($10)</span>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
