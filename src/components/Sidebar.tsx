@@ -29,7 +29,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
   const pixelCount = selectedPixels.reduce((sum, pixel) => 
     sum + (pixel.width * pixel.height), 0
   );
-  const price = pixelCount * 0.01; // $0.01 per pixel
+  const price = pixelCount * 0.10; // $0.10 per pixel
 
   return (
     <div className="w-full border-b border-border bg-card/50 p-3 space-y-4">
