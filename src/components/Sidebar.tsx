@@ -32,26 +32,44 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
   const price = pixelCount * 0.01; // $0.01 per pixel
 
   return (
-    <div className="w-full border-b border-border bg-card/50 p-3">
-      <div className="flex flex-wrap gap-4 items-center justify-between">
-        {/* Header Section */}
+    <div className="w-full border-b border-border bg-card/50 p-3 space-y-4">
+      {/* Title and Description */}
+      <div className="space-y-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
             <DollarSign className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-bold">Pixel Marketplace</h1>
-            <p className="text-xs text-muted-foreground">10,000 x 10,000 pixel canvas</p>
+            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              The Million Dollar Homepage 2.0
+            </h1>
+            <p className="text-sm text-muted-foreground">20th Anniversary Edition - 100 Million Pixels Available</p>
           </div>
-          <div className="flex gap-4 ml-4">
-            <div className="text-center">
-              <div className="text-lg font-bold text-primary">3</div>
-              <div className="text-xs text-muted-foreground">Pixels Sold</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-accent">$30.00</div>
-              <div className="text-xs text-muted-foreground">Revenue</div>
-            </div>
+        </div>
+        
+        <div className="max-w-4xl">
+          <p className="text-sm leading-relaxed text-foreground/90">
+            Twenty years ago, a simple idea changed internet history. Now, as digital landscapes evolve at breakneck speed, 
+            <span className="font-semibold text-primary"> your company deserves more than fleeting social media posts</span>. 
+            This is your chance to claim permanent digital real estate on the world's most iconic pixel canvas. 
+            Whether you're a startup seeking that breakthrough moment, an established brand wanting to make a bold statement, 
+            or simply someone who believes in leaving a lasting mark on internet history - 
+            <span className="font-semibold text-accent"> this is your testament to existence in the digital age</span>.
+            Own a piece of internet legacy that will outlast trends, algorithms, and platforms.
+          </p>
+        </div>
+      </div>
+
+      {/* Stats and Controls */}
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex gap-4">
+          <div className="text-center">
+            <div className="text-lg font-bold text-primary">3</div>
+            <div className="text-xs text-muted-foreground">Pixels Sold</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-accent">$30.00</div>
+            <div className="text-xs text-muted-foreground">Revenue</div>
           </div>
         </div>
 
