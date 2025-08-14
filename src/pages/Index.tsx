@@ -8,7 +8,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar selectedPixels={selectedPixels} />
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-1">
         <PixelGrid onPixelSelect={setSelectedPixels} />
       </div>
     </div>

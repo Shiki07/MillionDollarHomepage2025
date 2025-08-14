@@ -32,16 +32,16 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
   const price = pixelCount * 0.01; // $0.01 per pixel
 
   return (
-    <div className="w-80 space-y-4 p-4">
+    <div className="w-64 space-y-3 p-3 border-r border-border bg-card/50">
       {/* Header */}
-      <Card className="glass-card p-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
+      <Card className="glass-card p-3">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
             <DollarSign className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Pixel Marketplace</h1>
-            <p className="text-sm text-muted-foreground">1M pixel canvas</p>
+            <h1 className="text-lg font-bold">Pixel Marketplace</h1>
+            <p className="text-xs text-muted-foreground">10M pixel canvas</p>
           </div>
         </div>
         
