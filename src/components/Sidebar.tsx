@@ -34,8 +34,8 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
   return (
     <div className="w-full border-b border-border bg-card/50 p-3 space-y-4">
       {/* Title and Description */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
+      <div className="text-center space-y-3">
+        <div className="flex items-center justify-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
             <DollarSign className="w-4 h-4 text-primary-foreground" />
           </div>
@@ -47,7 +47,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
           </div>
         </div>
         
-        <div className="max-w-4xl">
+        <div className="max-w-4xl mx-auto">
           <p className="text-sm leading-relaxed text-foreground/90">
             Twenty years ago, a simple idea changed internet history. Now, as digital landscapes evolve at breakneck speed, 
             <span className="font-semibold text-primary"> your company deserves more than fleeting social media posts</span>. 
