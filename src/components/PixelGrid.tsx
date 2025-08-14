@@ -22,7 +22,7 @@ interface PixelGridProps {
 export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(0.05); // Start very zoomed out for 10000x10000
+  const [zoom, setZoom] = useState(0.08); // Start even more zoomed out
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -56,8 +56,8 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
     console.log("Drawing grid with zoom:", zoom, "pan:", pan);
 
-    // Clear canvas with background color
-    ctx.fillStyle = '#0f172a'; // Dark blue background
+    // Clear canvas with visible background color
+    ctx.fillStyle = '#1e293b'; // Slate-800 background
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Set transform for zoom and pan
@@ -65,21 +65,37 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // Draw main grid area
-    ctx.fillStyle = '#1e293b'; // Slightly lighter background for the grid
+    // Draw main grid area with contrasting background
+    ctx.fillStyle = '#0f172a'; // Very dark background for the grid
     ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
 
-    // Draw grid border
-    ctx.strokeStyle = '#3b82f6'; // Blue border
-    ctx.lineWidth = 5 / zoom;
+    // Draw prominent grid border
+    ctx.strokeStyle = '#3b82f6'; // Bright blue border
+    ctx.lineWidth = 10 / zoom; // Thicker border
     ctx.strokeRect(0, 0, GRID_SIZE, GRID_SIZE);
 
-    // Draw grid lines only when zoomed in enough to see them
-    if (zoom > 0.1) {
+    // Draw corner markers to help see the grid boundaries
+    const markerSize = 100 / zoom;
+    ctx.fillStyle = '#ef4444'; // Red corner markers
+    // Top-left
+    ctx.fillRect(0, 0, markerSize, markerSize);
+    // Top-right  
+    ctx.fillRect(GRID_SIZE - markerSize, 0, markerSize, markerSize);
+    // Bottom-left
+    ctx.fillRect(0, GRID_SIZE - markerSize, markerSize, markerSize);
+    // Bottom-right
+    ctx.fillRect(GRID_SIZE - markerSize, GRID_SIZE - markerSize, markerSize, markerSize);
+
+    // Draw grid lines with adaptive spacing
+    const minGridSpacing = 50 / zoom; // Minimum spacing in screen pixels
+    let gridSpacing = 10;
+    while (gridSpacing * zoom < minGridSpacing && gridSpacing < 1000) {
+      gridSpacing *= 10;
+    }
+    
+    if (zoom > 0.01) { // Only draw grid lines when zoomed in enough
       ctx.strokeStyle = '#374151';
       ctx.lineWidth = 1 / zoom;
-      
-      const gridSpacing = zoom > 0.5 ? 10 : zoom > 0.2 ? 50 : 100;
       
       // Vertical lines
       for (let x = 0; x <= GRID_SIZE; x += gridSpacing) {
@@ -195,12 +211,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.01, Math.min(10, zoom * zoomFactor));
+    const newZoom = Math.max(0.001, Math.min(50, zoom * zoomFactor)); // Allow much higher zoom and lower zoom
     setZoom(newZoom);
   };
 
   const resetView = () => {
-    setZoom(0.05);
+    setZoom(0.08);
     setPan({ x: 0, y: 0 });
     setSelectedPixels([]);
   };
@@ -254,7 +270,29 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   }, [drawGrid]);
 
   return (
-    <Card className="flex-1 flex flex-col glass-card overflow-hidden">
+    <div className="flex flex-col h-full">
+      {/* Instructions at the very top */}
+      <div className="bg-card/50 border-b border-border p-3">
+        <div className="flex flex-wrap gap-6 items-center justify-between text-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <Move className="w-3 h-3 text-muted-foreground" />
+              <span><strong>Drag</strong> to pan around the 10,000x10,000 canvas</span>
+            </div>
+            <div>
+              <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
+            </div>
+            <div>
+              <span><strong>Scroll</strong> to zoom in/out (supports massive zoom levels)</span>
+            </div>
+          </div>
+          <div className="text-muted-foreground">
+            💡 Tip: Use "Fit" to see the entire grid, then zoom in to explore details
+          </div>
+        </div>
+      </div>
+
+    <Card className="flex-1 flex flex-col glass-card overflow-hidden rounded-t-none">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Square className="w-5 h-5 text-primary" />
@@ -268,14 +306,14 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setZoom(Math.max(0.01, zoom * 0.8))}
+            onClick={() => setZoom(Math.max(0.001, zoom * 0.8))}
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setZoom(Math.min(10, zoom * 1.25))}
+            onClick={() => setZoom(Math.min(50, zoom * 1.25))}
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -304,25 +342,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           style={{ 
             width: '100%', 
             height: '100%',
-            imageRendering: 'pixelated'
+            imageRendering: 'pixelated',
+            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'grab'
           }}
         />
         
-        {/* Instructions overlay */}
-        <div className="absolute top-4 left-4 glass-card p-3 max-w-xs">
-          <div className="text-sm space-y-1">
-            <div className="flex items-center gap-2 font-semibold">
-              <Move className="w-3 h-3" />
-              <span>Controls</span>
-            </div>
-            <div>• Drag to pan around</div>
-            <div>• <span className="font-mono bg-muted px-1 rounded">Shift + Drag</span> to select</div>
-            <div>• Scroll to zoom in/out</div>
-            <div>• Use controls above for precise zoom</div>
-          </div>
-        </div>
-
-        {/* Stats overlay */}
+        {/* Stats overlay - moved to bottom right */}
         <div className="absolute bottom-4 right-4 glass-card p-3">
           <div className="text-sm space-y-1">
             <div className="font-semibold">Grid Stats</div>
@@ -339,16 +364,14 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           </div>
         </div>
 
-        {/* Loading indicator */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 glass-card p-4">
-          <div className="text-center">
-            <div className="text-lg font-semibold">10,000 x 10,000 Pixel Canvas</div>
-            <div className="text-sm text-muted-foreground mt-1">
-              Use "Fit" button to see the entire grid
-            </div>
+        {/* Zoom indicator - moved to bottom left */}
+        <div className="absolute bottom-4 left-4 glass-card p-2">
+          <div className="text-xs text-muted-foreground">
+            Zoom: <span className="font-mono text-primary">{Math.round(zoom * 100)}%</span>
           </div>
         </div>
       </div>
     </Card>
+    </div>
   );
 };
