@@ -41,7 +41,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
           </div>
           <div>
             <h1 className="text-xl font-bold">Pixel Marketplace</h1>
-            <p className="text-sm text-muted-foreground">100M pixel canvas</p>
+            <p className="text-sm text-muted-foreground">1M pixel canvas</p>
           </div>
         </div>
         

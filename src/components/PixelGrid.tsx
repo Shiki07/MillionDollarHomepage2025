@@ -22,7 +22,7 @@ interface PixelGridProps {
 export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(0.1);
+  const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -35,8 +35,8 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     { id: '2', x: 300, y: 200, width: 50, height: 50, sold: true, owner: 'Test Corp' },
   ]);
 
-  const GRID_SIZE = 10000;
-  const PIXEL_SIZE = 1;
+  const GRID_SIZE = 1000; // Start smaller for visibility
+  const PIXEL_SIZE = 10;
 
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
@@ -54,33 +54,38 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     ctx.scale(zoom, zoom);
 
     // Draw background
-    ctx.fillStyle = 'hsl(220, 27%, 6%)';
+    ctx.fillStyle = 'hsl(220, 27%, 8%)';
     ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
 
-    // Draw grid lines (only when zoomed in enough)
-    if (zoom > 0.5) {
-      ctx.strokeStyle = 'hsl(220, 27%, 16%)';
-      ctx.lineWidth = 1 / zoom;
-      
-      for (let x = 0; x <= GRID_SIZE; x += 10) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, GRID_SIZE);
-        ctx.stroke();
-      }
-      
-      for (let y = 0; y <= GRID_SIZE; y += 10) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(GRID_SIZE, y);
-        ctx.stroke();
-      }
+    // Draw grid lines
+    ctx.strokeStyle = 'hsl(220, 27%, 16%)';
+    ctx.lineWidth = 1 / zoom;
+    
+    // Draw vertical lines
+    for (let x = 0; x <= GRID_SIZE; x += PIXEL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, GRID_SIZE);
+      ctx.stroke();
+    }
+    
+    // Draw horizontal lines
+    for (let y = 0; y <= GRID_SIZE; y += PIXEL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(GRID_SIZE, y);
+      ctx.stroke();
     }
 
     // Draw sold pixels
     soldPixels.forEach(pixel => {
       ctx.fillStyle = 'hsl(217, 91%, 60%)';
       ctx.fillRect(pixel.x, pixel.y, pixel.width, pixel.height);
+      
+      // Add border
+      ctx.strokeStyle = 'hsl(217, 91%, 70%)';
+      ctx.lineWidth = 2 / zoom;
+      ctx.strokeRect(pixel.x, pixel.y, pixel.width, pixel.height);
     });
 
     // Draw selected pixels
@@ -139,10 +144,10 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       
       // Snap to grid
       const snappedSelection = {
-        x: Math.floor(selection.x / 10) * 10,
-        y: Math.floor(selection.y / 10) * 10,
-        width: Math.ceil(selection.width / 10) * 10,
-        height: Math.ceil(selection.height / 10) * 10,
+        x: Math.floor(selection.x / PIXEL_SIZE) * PIXEL_SIZE,
+        y: Math.floor(selection.y / PIXEL_SIZE) * PIXEL_SIZE,
+        width: Math.ceil(selection.width / PIXEL_SIZE) * PIXEL_SIZE,
+        height: Math.ceil(selection.height / PIXEL_SIZE) * PIXEL_SIZE,
       };
 
       setSelectedPixels([{
@@ -163,12 +168,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    const newZoom = Math.max(0.05, Math.min(5, zoom + (e.deltaY > 0 ? -0.1 : 0.1)));
+    const newZoom = Math.max(0.1, Math.min(5, zoom + (e.deltaY > 0 ? -0.1 : 0.1)));
     setZoom(newZoom);
   };
 
   const resetView = () => {
-    setZoom(0.1);
+    setZoom(1);
     setPan({ x: 0, y: 0 });
   };
 
@@ -197,7 +202,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Square className="w-5 h-5 text-primary" />
-          <span className="font-semibold">10,000 x 10,000 Pixel Grid</span>
+          <span className="font-semibold">1,000 x 1,000 Pixel Grid</span>
           <span className="text-sm text-muted-foreground">
             Zoom: {Math.round(zoom * 100)}%
           </span>
@@ -207,7 +212,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setZoom(Math.max(0.05, zoom - 0.1))}
+            onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
@@ -254,9 +259,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         {/* Stats overlay */}
         <div className="absolute bottom-4 right-4 glass-card p-3">
           <div className="text-sm space-y-1">
-            <div>Total Pixels: <span className="font-mono">100,000,000</span></div>
+            <div>Total Pixels: <span className="font-mono">1,000,000</span></div>
             <div>Sold: <span className="font-mono text-primary">2</span></div>
-            <div>Available: <span className="font-mono text-accent">99,999,998</span></div>
+            <div>Available: <span className="font-mono text-accent">999,998</span></div>
           </div>
         </div>
       </div>
