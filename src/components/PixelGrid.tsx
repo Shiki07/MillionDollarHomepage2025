@@ -74,17 +74,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     ctx.lineWidth = 10 / zoom; // Thicker border
     ctx.strokeRect(0, 0, GRID_SIZE, GRID_SIZE);
 
-    // Draw corner markers to help see the grid boundaries
-    const markerSize = 100 / zoom;
-    ctx.fillStyle = '#ef4444'; // Red corner markers
-    // Top-left
-    ctx.fillRect(0, 0, markerSize, markerSize);
-    // Top-right  
-    ctx.fillRect(GRID_SIZE - markerSize, 0, markerSize, markerSize);
-    // Bottom-left
-    ctx.fillRect(0, GRID_SIZE - markerSize, markerSize, markerSize);
-    // Bottom-right
-    ctx.fillRect(GRID_SIZE - markerSize, GRID_SIZE - markerSize, markerSize, markerSize);
 
     // Draw grid lines with adaptive spacing
     const minGridSpacing = 50 / zoom; // Minimum spacing in screen pixels
