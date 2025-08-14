@@ -32,163 +32,64 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
   const price = pixelCount * 0.01; // $0.01 per pixel
 
   return (
-    <div className="w-64 space-y-3 p-3 border-r border-border bg-card/50">
-      {/* Header */}
-      <Card className="glass-card p-3">
-        <div className="flex items-center gap-2 mb-3">
+    <div className="w-full border-b border-border bg-card/50 p-3">
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        {/* Header Section */}
+        <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-            <DollarSign className="w-5 h-5 text-primary-foreground" />
+            <DollarSign className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-lg font-bold">Pixel Marketplace</h1>
-            <p className="text-xs text-muted-foreground">10M pixel canvas</p>
+            <p className="text-xs text-muted-foreground">10,000 x 10,000 pixel canvas</p>
+          </div>
+          <div className="flex gap-4 ml-4">
+            <div className="text-center">
+              <div className="text-lg font-bold text-primary">3</div>
+              <div className="text-xs text-muted-foreground">Pixels Sold</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-accent">$30.00</div>
+              <div className="text-xs text-muted-foreground">Revenue</div>
+            </div>
           </div>
         </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-primary">2</div>
-            <div className="text-xs text-muted-foreground">Pixels Sold</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-accent">$20.00</div>
-            <div className="text-xs text-muted-foreground">Revenue</div>
-          </div>
-        </div>
-      </Card>
 
-      {/* Selection Info */}
-      {selectedPixels.length > 0 ? (
-        <Card className="glass-card p-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="w-4 h-4 text-accent" />
-            <h3 className="font-semibold">Purchase Pixels</h3>
+        {/* Selection Info or Quick Actions */}
+        {selectedPixels.length > 0 ? (
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4 text-accent" />
+              <span className="font-semibold">Purchase Pixels</span>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div>Selected: <span className="font-mono">{pixelCount.toLocaleString()}</span></div>
+              <div>Total: <span className="font-mono text-accent">${price.toFixed(2)}</span></div>
+            </div>
+            <Button className="glow-button">
+              <CreditCard className="w-4 h-4 mr-2" />
+              Purchase for ${price.toFixed(2)}
+            </Button>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Selected Pixels:</span>
-              <span className="font-mono">{pixelCount.toLocaleString()}</span>
+        ) : (
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ImageIcon className="w-4 h-4" />
+              <span>Hold Shift and drag to select pixel areas</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Price per pixel:</span>
-              <span className="font-mono">$0.01</span>
-            </div>
-            <div className="flex justify-between font-semibold border-t border-border pt-2">
-              <span>Total:</span>
-              <span className="font-mono text-accent">${price.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="url">Target URL</Label>
-              <Input
-                id="url"
-                placeholder="https://example.com"
-                value={formData.url}
-                onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input
-                id="imageUrl"
-                placeholder="https://example.com/image.png"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="alt">Alt Text</Label>
-              <Input
-                id="alt"
-                placeholder="Description of your image"
-                value={formData.alt}
-                onChange={(e) => setFormData(prev => ({ ...prev, alt: e.target.value }))}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="mt-1"
-              />
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <User className="w-4 h-4 mr-2" />
+                My Pixels
+              </Button>
+              <Button variant="outline" size="sm">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
             </div>
           </div>
-
-          <Button className="w-full glow-button">
-            <CreditCard className="w-4 h-4 mr-2" />
-            Purchase for ${price.toFixed(2)}
-          </Button>
-        </Card>
-      ) : (
-        <Card className="glass-card p-4">
-          <div className="text-center space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-lg bg-muted flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <div>
-              <h3 className="font-semibold mb-1">Select Pixels</h3>
-              <p className="text-sm text-muted-foreground">
-                Hold Shift and click to select pixel areas for purchase
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Quick Actions */}
-      <Card className="glass-card p-4 space-y-3">
-        <h3 className="font-semibold flex items-center gap-2">
-          <BarChart3 className="w-4 h-4" />
-          Quick Actions
-        </h3>
-        
-        <div className="space-y-2">
-          <Button variant="outline" className="w-full justify-start">
-            <User className="w-4 h-4 mr-2" />
-            View My Pixels
-          </Button>
-          <Button variant="outline" className="w-full justify-start">
-            <Wallet className="w-4 h-4 mr-2" />
-            Browse Marketplace
-          </Button>
-          <Button variant="outline" className="w-full justify-start">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Analytics
-          </Button>
-        </div>
-      </Card>
-
-      {/* Pricing Info */}
-      <Card className="glass-card p-4">
-        <h3 className="font-semibold mb-3">Pricing</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span>Base price:</span>
-            <span className="font-mono">$0.01/pixel</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Minimum purchase:</span>
-            <span className="font-mono">100 pixels</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Maximum purchase:</span>
-            <span className="font-mono">10,000 pixels</span>
-          </div>
-        </div>
-      </Card>
+        )}
+      </div>
     </div>
   );
 };
