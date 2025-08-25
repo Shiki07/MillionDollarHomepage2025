@@ -65,7 +65,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // Draw prominent grid border (removed internal fill so images can show)
+    // Draw main grid area with contrasting background
+    ctx.fillStyle = '#0f172a'; // Very dark background for the grid
+    ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
+
+    // Draw prominent grid border
     ctx.strokeStyle = '#3b82f6'; // Bright blue border
     ctx.lineWidth = 10 / zoom; // Thicker border
     ctx.strokeRect(0, 0, GRID_SIZE, GRID_SIZE);
