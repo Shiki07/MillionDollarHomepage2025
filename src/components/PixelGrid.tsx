@@ -105,10 +105,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
     // Draw sold pixels
     soldPixels.forEach(pixel => {
-      ctx.fillStyle = '#3b82f6'; // Blue for sold pixels
-      ctx.fillRect(pixel.x, pixel.y, pixel.width, pixel.height);
-      
-      // Add border to sold pixels
+      // Add border to sold pixels (removed fill so images can show through)
       ctx.strokeStyle = '#60a5fa';
       ctx.lineWidth = 3 / zoom;
       ctx.strokeRect(pixel.x, pixel.y, pixel.width, pixel.height);
