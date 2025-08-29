@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
 import { ZoomIn, ZoomOut, RotateCcw, Move, Square } from "lucide-react";
 
 interface PixelData {
@@ -28,7 +29,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
-  const [isPanning, setIsPanning] = useState(false);
 
   // Sample sold pixels for demo
   const [soldPixels] = useState<PixelData[]>([
@@ -179,7 +179,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       onPixelSelect?.(selectedPixels);
     }
     setIsSelecting(false);
-    setIsPanning(false);
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -309,49 +308,36 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     return () => window.removeEventListener('resize', updateCanvasSize);
   }, []);
 
-  // Handle pan control
-  const handlePanControlMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsPanning(true);
-  };
+  // Calculate if pan control should be visible
+  const shouldShowPanControl = zoom > 1 && containerRef.current && GRID_SIZE * zoom > containerRef.current.clientWidth;
 
-  const handlePanControlMouseMove = (e: React.MouseEvent) => {
-    if (!isPanning || !containerRef.current) return;
-    
+  // Handle slider value change
+  const handlePanSliderChange = (values: number[]) => {
+    if (!containerRef.current) return;
     const container = containerRef.current;
-    const rect = container.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    
-    // Calculate the pan position based on mouse position
-    const panControlWidth = container.clientWidth - 40; // Account for padding
-    const progress = Math.max(0, Math.min(1, mouseX / panControlWidth));
-    
-    // Calculate the range of possible pan values
     const gridWidth = GRID_SIZE * zoom;
     const maxPanX = container.clientWidth - gridWidth;
     const minPanX = 0;
     
     if (gridWidth > container.clientWidth) {
+      const progress = values[0] / 100; // Slider value is 0-100
       const newPanX = maxPanX + progress * (minPanX - maxPanX);
       setPan(prev => ({ ...prev, x: newPanX }));
     }
   };
 
-  // Calculate if pan control should be visible
-  const shouldShowPanControl = zoom > 1 && containerRef.current && GRID_SIZE * zoom > containerRef.current.clientWidth;
-
-  // Calculate pan control position
-  const getPanControlPosition = () => {
-    if (!containerRef.current) return 0;
+  // Calculate slider value from current pan
+  const getPanSliderValue = () => {
+    if (!containerRef.current) return [0];
     const container = containerRef.current;
     const gridWidth = GRID_SIZE * zoom;
     const maxPanX = container.clientWidth - gridWidth;
     const minPanX = 0;
     
-    if (gridWidth <= container.clientWidth) return 0;
+    if (gridWidth <= container.clientWidth) return [0];
     
     const progress = (pan.x - maxPanX) / (minPanX - maxPanX);
-    return Math.max(0, Math.min(1, progress)) * (container.clientWidth - 60); // Account for padding and thumb width
+    return [Math.max(0, Math.min(100, progress * 100))];
   };
 
   // Draw grid when dependencies change
@@ -497,23 +483,21 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           </div>
         </div>
 
-        {/* Pan control bar - only visible when zoomed in */}
+        {/* Pan control slider - only visible when zoomed in */}
         {shouldShowPanControl && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 flex items-center justify-center bg-card/80 backdrop-blur-sm border-t border-border">
-            <div 
-              className="relative w-full max-w-4xl h-2 bg-muted rounded-full mx-5 cursor-pointer"
-              onMouseDown={handlePanControlMouseDown}
-              onMouseMove={handlePanControlMouseMove}
-              onMouseUp={() => setIsPanning(false)}
-              onMouseLeave={() => setIsPanning(false)}
-            >
-              <div 
-                className="absolute top-0 h-full w-8 bg-primary rounded-full transition-all duration-75 cursor-grab active:cursor-grabbing"
-                style={{ 
-                  left: `${getPanControlPosition()}px`,
-                  transform: 'translateX(-50%)'
-                }}
+          <div className="absolute bottom-0 left-0 right-0 h-12 flex items-center justify-center bg-card/90 backdrop-blur-sm border-t border-border px-6">
+            <div className="flex items-center gap-3 w-full max-w-4xl">
+              <Move className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <Slider
+                value={getPanSliderValue()}
+                onValueChange={handlePanSliderChange}
+                max={100}
+                step={1}
+                className="flex-1"
               />
+              <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
+                Pan: {Math.round(getPanSliderValue()[0])}%
+              </span>
             </div>
           </div>
         )}
