@@ -399,7 +399,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
       <div 
         ref={containerRef}
-        className="flex-1 relative overflow-hidden bg-slate-900"
+        className="flex-1 relative overflow-hidden bg-slate-900 mt-4"
         style={{ minHeight: 'calc(100vh - 120px)' }}
       >
         <canvas
