@@ -181,8 +181,29 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor)); // Minimum 100% zoom
+    const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor));
+    
+    if (!containerRef.current) {
+      setZoom(newZoom);
+      return;
+    }
+    
+    const container = containerRef.current;
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    
+    // Calculate the grid center point in canvas coordinates
+    const gridCenterX = GRID_SIZE / 2;
+    const gridCenterY = GRID_SIZE / 2;
+    
+    // Calculate new pan to keep the grid centered during zoom
+    const newPan = {
+      x: centerX - gridCenterX * newZoom,
+      y: centerY - gridCenterY * newZoom
+    };
+    
     setZoom(newZoom);
+    setPan(newPan);
   };
 
   const centerView = () => {
@@ -299,14 +320,44 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setZoom(Math.max(1.0, zoom * 0.8))}
+            onClick={() => {
+              const newZoom = Math.max(1.0, zoom * 0.8);
+              if (containerRef.current) {
+                const container = containerRef.current;
+                const centerX = container.clientWidth / 2;
+                const centerY = container.clientHeight / 2;
+                const gridCenterX = GRID_SIZE / 2;
+                const gridCenterY = GRID_SIZE / 2;
+                
+                setPan({
+                  x: centerX - gridCenterX * newZoom,
+                  y: centerY - gridCenterY * newZoom
+                });
+              }
+              setZoom(newZoom);
+            }}
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setZoom(Math.min(50, zoom * 1.25))}
+            onClick={() => {
+              const newZoom = Math.min(50, zoom * 1.25);
+              if (containerRef.current) {
+                const container = containerRef.current;
+                const centerX = container.clientWidth / 2;
+                const centerY = container.clientHeight / 2;
+                const gridCenterX = GRID_SIZE / 2;
+                const gridCenterY = GRID_SIZE / 2;
+                
+                setPan({
+                  x: centerX - gridCenterX * newZoom,
+                  y: centerY - gridCenterY * newZoom
+                });
+              }
+              setZoom(newZoom);
+            }}
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
