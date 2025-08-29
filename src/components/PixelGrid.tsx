@@ -65,11 +65,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     ctx.fillStyle = '#0f172a'; // Very dark background for the grid
     ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
 
-    // Draw prominent grid border
-    ctx.strokeStyle = '#6b7280'; // Gray border
-    ctx.lineWidth = 10 / zoom; // Thicker border
-    ctx.strokeRect(0, 0, GRID_SIZE, GRID_SIZE);
-
 
     // Draw grid lines with adaptive spacing
     const minGridSpacing = 50 / zoom; // Minimum spacing in screen pixels
