@@ -216,7 +216,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     });
   };
 
-  // Initialize canvas size
+  // Initialize canvas size and set to fit view
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -233,8 +233,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
         
-        // Redraw after size change
-        setTimeout(() => drawGrid(), 0);
+        // Set initial view to fit and redraw
+        setTimeout(() => {
+          zoomToFit();
+          drawGrid();
+        }, 0);
       }
     };
 
