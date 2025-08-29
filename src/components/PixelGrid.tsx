@@ -38,6 +38,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
   const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
+  const TOP_PADDING = 30; // Space between instructions and grid
 
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
@@ -198,7 +199,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     
     // Calculate new pan to keep the grid centered during zoom, but constrain top
     const idealPanY = centerY - gridCenterY * newZoom;
-    const minPanY = 0; // Don't let the grid go above the canvas area
+    const minPanY = TOP_PADDING; // Keep space between instructions and grid
     
     const newPan = {
       x: centerX - gridCenterX * newZoom,
@@ -229,7 +230,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       const gridCenterY = GRID_SIZE / 2;
       
       const idealPanY = centerY - gridCenterY * 1.0;
-      const minPanY = 0;
+      const minPanY = TOP_PADDING;
       
       setPan({ 
         x: centerX - gridCenterX * 1.0,
@@ -255,7 +256,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     const gridCenterY = GRID_SIZE / 2;
     
     const idealPanY = centerY - gridCenterY * 1.0;
-    const minPanY = Math.max(0, (container.clientHeight - GRID_SIZE * fitZoom) / 2);
+    const minPanY = Math.max(TOP_PADDING, (container.clientHeight - GRID_SIZE * fitZoom) / 2);
     
     setPan({ 
       x: centerX - gridCenterX * 1.0,
@@ -285,7 +286,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         const gridCenterY = GRID_SIZE / 2;
         
         const idealPanY = centerY - gridCenterY * 1.0;
-        const minPanY = 0;
+        const minPanY = TOP_PADDING;
         
         setPan({
           x: centerX - gridCenterX * 1.0,
@@ -351,7 +352,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
                 const gridCenterY = GRID_SIZE / 2;
                 
                 const idealPanY = centerY - gridCenterY * newZoom;
-                const minPanY = 0;
+                const minPanY = TOP_PADDING;
                 
                 setPan({
                   x: centerX - gridCenterX * newZoom,
@@ -376,7 +377,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
                 const gridCenterY = GRID_SIZE / 2;
                 
                 const idealPanY = centerY - gridCenterY * newZoom;
-                const minPanY = 0;
+                const minPanY = TOP_PADDING;
                 
                 setPan({
                   x: centerX - gridCenterX * newZoom,
