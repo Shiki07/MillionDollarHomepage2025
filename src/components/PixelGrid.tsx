@@ -270,8 +270,10 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         const container = containerRef.current;
         const canvas = canvasRef.current;
         
+        // Account for padding (py-8 = 2rem top + 2rem bottom = 64px total)
+        const paddingOffset = 64;
         canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
+        canvas.height = container.clientHeight - paddingOffset;
         
         setCanvasSize({
           width: container.clientWidth,
@@ -399,12 +401,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
       <div 
         ref={containerRef}
-        className="flex-1 relative overflow-hidden bg-slate-900"
+        className="flex-1 relative overflow-hidden bg-slate-900 py-8"
         style={{ minHeight: 'calc(100vh - 120px)' }}
       >
         <canvas
           ref={canvasRef}
-          className="absolute inset-0"
+          className="absolute inset-x-0 top-8 bottom-8"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -412,7 +414,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           onWheel={handleWheel}
           style={{ 
             width: '100%', 
-            height: '100%',
+            height: 'calc(100% - 4rem)',
             imageRendering: 'pixelated',
             cursor: isSelecting ? 'crosshair' : 'default'
           }}
