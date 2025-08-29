@@ -23,9 +23,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1.0); // Start at 100% zoom
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [pan, setPan] = useState({ x: 0, y: 0 }); // Will be set to center the grid
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
@@ -142,19 +140,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       setIsSelecting(true);
       setSelectionStart(coords);
       setSelectedPixels([]); // Clear previous selection
-    } else {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      });
-    } else if (isSelecting) {
+    if (isSelecting) {
       const coords = getCanvasCoordinates(e.clientX, e.clientY);
       const selection = {
         x: Math.min(selectionStart.x, coords.x),
@@ -185,7 +175,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     if (isSelecting && selectedPixels.length > 0) {
       onPixelSelect?.(selectedPixels);
     }
-    setIsDragging(false);
     setIsSelecting(false);
   };
 
@@ -196,10 +185,25 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     setZoom(newZoom);
   };
 
+  const centerView = () => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    setPan({ 
+      x: (container.clientWidth - GRID_SIZE * zoom) / 2,
+      y: (container.clientHeight - GRID_SIZE * zoom) / 2
+    });
+  };
+
   const resetView = () => {
     setZoom(1.0);
-    setPan({ x: 0, y: 0 });
     setSelectedPixels([]);
+    if (containerRef.current) {
+      const container = containerRef.current;
+      setPan({ 
+        x: (container.clientWidth - GRID_SIZE * 1.0) / 2,
+        y: (container.clientHeight - GRID_SIZE * 1.0) / 2
+      });
+    }
   };
 
   const zoomToFit = () => {
@@ -216,7 +220,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     });
   };
 
-  // Initialize canvas size
+  // Initialize canvas size and center the grid
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -231,6 +235,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           height: container.clientHeight
         });
         
+        // Center the grid at 100% zoom
+        setPan({ 
+          x: (container.clientWidth - GRID_SIZE * zoom) / 2,
+          y: (container.clientHeight - GRID_SIZE * zoom) / 2
+        });
+        
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
         
         // Redraw after size change
@@ -241,7 +251,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [drawGrid]);
+  }, [drawGrid, zoom]);
 
   // Draw grid when dependencies change
   useEffect(() => {
@@ -256,15 +266,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       <div className="bg-card/50 border-b border-border p-3">
         <div className="flex flex-wrap gap-6 items-center justify-between text-sm">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Move className="w-3 h-3 text-muted-foreground" />
-              <span><strong>Drag</strong> to pan around the 1,000x1,000 canvas</span>
-            </div>
             <div>
               <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
             </div>
             <div>
-              <span><strong>Scroll</strong> to zoom in/out (supports massive zoom levels)</span>
+              <span><strong>Scroll</strong> to zoom in/out (maintains center position)</span>
             </div>
           </div>
           <div className="text-muted-foreground">
@@ -314,7 +320,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       >
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 cursor-move"
+          className="absolute inset-0"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -324,7 +330,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
             width: '100%', 
             height: '100%',
             imageRendering: 'pixelated',
-            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'grab'
+            cursor: isSelecting ? 'crosshair' : 'default'
           }}
         />
         
