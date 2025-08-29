@@ -43,7 +43,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
             <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               The Million Dollar Homepage 2025
             </h1>
-            <p className="text-sm text-muted-foreground">20th Anniversary Edition - 100 Million Pixels Available</p>
+            <p className="text-sm text-muted-foreground">20th Anniversary Edition - 1 Million Pixels Available</p>
           </div>
         </div>
         
