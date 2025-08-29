@@ -203,6 +203,16 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor)); // Minimum 100% zoom
+    
+    if (newZoom !== zoom && containerRef.current) {
+      const container = containerRef.current;
+      // Center horizontally, anchor at top
+      const newPanX = (container.clientWidth - GRID_SIZE * newZoom) / 2;
+      const newPanY = Math.max(0, pan.y); // Keep top position, don't go negative
+      
+      setPan({ x: newPanX, y: newPanY });
+    }
+    
     setZoom(newZoom);
   };
 
