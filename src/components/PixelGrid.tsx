@@ -196,10 +196,13 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     const gridCenterX = GRID_SIZE / 2;
     const gridCenterY = GRID_SIZE / 2;
     
-    // Calculate new pan to keep the grid centered during zoom
+    // Calculate new pan to keep the grid centered during zoom, but constrain top
+    const idealPanY = centerY - gridCenterY * newZoom;
+    const minPanY = 0; // Don't let the grid go above the canvas area
+    
     const newPan = {
       x: centerX - gridCenterX * newZoom,
-      y: centerY - gridCenterY * newZoom
+      y: Math.max(minPanY, idealPanY)
     };
     
     setZoom(newZoom);
@@ -220,9 +223,17 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     setSelectedPixels([]);
     if (containerRef.current) {
       const container = containerRef.current;
+      const centerX = container.clientWidth / 2;
+      const centerY = container.clientHeight / 2;
+      const gridCenterX = GRID_SIZE / 2;
+      const gridCenterY = GRID_SIZE / 2;
+      
+      const idealPanY = centerY - gridCenterY * 1.0;
+      const minPanY = 0;
+      
       setPan({ 
-        x: (container.clientWidth - GRID_SIZE * 1.0) / 2,
-        y: (container.clientHeight - GRID_SIZE * 1.0) / 2
+        x: centerX - gridCenterX * 1.0,
+        y: Math.max(minPanY, idealPanY)
       });
     }
   };
@@ -235,15 +246,24 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       container.clientHeight / GRID_SIZE
     ) * 0.9;
     
-    // Set zoom to 100% but use fit centering logic
+    // Set zoom to 100% but use centered positioning with top constraint
     setZoom(1.0);
+    
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    const gridCenterX = GRID_SIZE / 2;
+    const gridCenterY = GRID_SIZE / 2;
+    
+    const idealPanY = centerY - gridCenterY * 1.0;
+    const minPanY = Math.max(0, (container.clientHeight - GRID_SIZE * fitZoom) / 2);
+    
     setPan({ 
-      x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
-      y: (container.clientHeight - GRID_SIZE * fitZoom) / 2
+      x: centerX - gridCenterX * 1.0,
+      y: Math.max(minPanY, idealPanY)
     });
   };
 
-  // Initialize canvas size and center the grid using fit logic
+  // Initialize canvas size and center the grid using proper constraints
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -258,18 +278,19 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           height: container.clientHeight
         });
         
-        // Use fit logic to center the grid properly
-        const fitZoom = Math.min(
-          container.clientWidth / GRID_SIZE,
-          container.clientHeight / GRID_SIZE
-        ) * 0.9;
+        // Center the grid with top constraint
+        const centerX = container.clientWidth / 2;
+        const centerY = container.clientHeight / 2;
+        const gridCenterX = GRID_SIZE / 2;
+        const gridCenterY = GRID_SIZE / 2;
         
-        // Center using the fit zoom calculation but keep actual zoom at 1.0
-        const centeredPan = {
-          x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
-          y: (container.clientHeight - GRID_SIZE * fitZoom) / 2
-        };
-        setPan(centeredPan);
+        const idealPanY = centerY - gridCenterY * 1.0;
+        const minPanY = 0;
+        
+        setPan({
+          x: centerX - gridCenterX * 1.0,
+          y: Math.max(minPanY, idealPanY)
+        });
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
       }
@@ -329,9 +350,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
                 const gridCenterX = GRID_SIZE / 2;
                 const gridCenterY = GRID_SIZE / 2;
                 
+                const idealPanY = centerY - gridCenterY * newZoom;
+                const minPanY = 0;
+                
                 setPan({
                   x: centerX - gridCenterX * newZoom,
-                  y: centerY - gridCenterY * newZoom
+                  y: Math.max(minPanY, idealPanY)
                 });
               }
               setZoom(newZoom);
@@ -351,9 +375,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
                 const gridCenterX = GRID_SIZE / 2;
                 const gridCenterY = GRID_SIZE / 2;
                 
+                const idealPanY = centerY - gridCenterY * newZoom;
+                const minPanY = 0;
+                
                 setPan({
                   x: centerX - gridCenterX * newZoom,
-                  y: centerY - gridCenterY * newZoom
+                  y: Math.max(minPanY, idealPanY)
                 });
               }
               setZoom(newZoom);
