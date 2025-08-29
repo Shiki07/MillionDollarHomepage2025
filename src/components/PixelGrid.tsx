@@ -70,7 +70,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
 
     // Draw prominent grid border
-    ctx.strokeStyle = '#3b82f6'; // Bright blue border
+    ctx.strokeStyle = '#6b7280'; // Gray border
     ctx.lineWidth = 10 / zoom; // Thicker border
     ctx.strokeRect(0, 0, GRID_SIZE, GRID_SIZE);
 
@@ -105,11 +105,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
     // Draw sold pixels
     soldPixels.forEach(pixel => {
-      ctx.fillStyle = '#3b82f6'; // Blue for sold pixels
+      ctx.fillStyle = '#6b7280'; // Gray for sold pixels
       ctx.fillRect(pixel.x, pixel.y, pixel.width, pixel.height);
       
       // Add border to sold pixels
-      ctx.strokeStyle = '#60a5fa';
+      ctx.strokeStyle = '#9ca3af';
       ctx.lineWidth = 3 / zoom;
       ctx.strokeRect(pixel.x, pixel.y, pixel.width, pixel.height);
     });
@@ -342,7 +342,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <div className="text-sm space-y-1">
             <div className="font-semibold">Grid Stats</div>
             <div>Total Pixels: <span className="font-mono text-primary">1,000,000</span></div>
-            <div>Sold: <span className="font-mono text-blue-400">{soldPixels.length}</span></div>
+            <div>Sold: <span className="font-mono text-muted-foreground">{soldPixels.length}</span></div>
             <div>Available: <span className="font-mono text-green-400">999,997</span></div>
             {selectedPixels.length > 0 && (
               <div className="border-t border-border pt-1 mt-2">
