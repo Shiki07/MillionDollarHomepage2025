@@ -22,8 +22,10 @@ interface PixelGridProps {
 export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(1.0); // Start at 100% zoom
-  const [pan, setPan] = useState({ x: 0, y: 0 }); // Will be set to center the grid
+  const [zoom, setZoom] = useState(0.08); // Start even more zoomed out
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
@@ -31,12 +33,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
   // Sample sold pixels for demo
   const [soldPixels] = useState<PixelData[]>([
-    { id: '1', x: 100, y: 100, width: 200, height: 200, sold: true, owner: 'Demo User' },
-    { id: '2', x: 300, y: 200, width: 100, height: 100, sold: true, owner: 'Test Corp' },
-    { id: '3', x: 500, y: 500, width: 200, height: 150, sold: true, owner: 'Big Brand' },
+    { id: '1', x: 1000, y: 1000, width: 200, height: 200, sold: true, owner: 'Demo User' },
+    { id: '2', x: 3000, y: 2000, width: 100, height: 100, sold: true, owner: 'Test Corp' },
+    { id: '3', x: 5000, y: 5000, width: 500, height: 300, sold: true, owner: 'Big Brand' },
   ]);
 
-  const GRID_SIZE = 1000;
+  const GRID_SIZE = 10000;
   const PIXEL_SIZE = 1;
 
   const drawGrid = useCallback(() => {
@@ -52,7 +54,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       return;
     }
 
-  console.log("Drawing grid with zoom:", zoom, "pan:", pan);
+    console.log("Drawing grid with zoom:", zoom, "pan:", pan);
 
     // Clear canvas with visible background color
     ctx.fillStyle = '#1e293b'; // Slate-800 background
@@ -66,6 +68,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     // Draw main grid area with contrasting background
     ctx.fillStyle = '#0f172a'; // Very dark background for the grid
     ctx.fillRect(0, 0, GRID_SIZE, GRID_SIZE);
+
+    // Draw prominent grid border
+    ctx.strokeStyle = '#3b82f6'; // Bright blue border
+    ctx.lineWidth = 10 / zoom; // Thicker border
+    ctx.strokeRect(0, 0, GRID_SIZE, GRID_SIZE);
 
 
     // Draw grid lines with adaptive spacing
@@ -98,7 +105,10 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
     // Draw sold pixels
     soldPixels.forEach(pixel => {
-      // Add border to sold pixels (removed fill so images can show through)
+      ctx.fillStyle = '#3b82f6'; // Blue for sold pixels
+      ctx.fillRect(pixel.x, pixel.y, pixel.width, pixel.height);
+      
+      // Add border to sold pixels
       ctx.strokeStyle = '#60a5fa';
       ctx.lineWidth = 3 / zoom;
       ctx.strokeRect(pixel.x, pixel.y, pixel.width, pixel.height);
@@ -140,11 +150,19 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       setIsSelecting(true);
       setSelectionStart(coords);
       setSelectedPixels([]); // Clear previous selection
+    } else {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isSelecting) {
+    if (isDragging) {
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    } else if (isSelecting) {
       const coords = getCanvasCoordinates(e.clientX, e.clientY);
       const selection = {
         x: Math.min(selectionStart.x, coords.x),
@@ -175,67 +193,21 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     if (isSelecting && selectedPixels.length > 0) {
       onPixelSelect?.(selectedPixels);
     }
+    setIsDragging(false);
     setIsSelecting(false);
   };
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor));
-    
-    if (!containerRef.current) {
-      setZoom(newZoom);
-      return;
-    }
-    
-    const container = containerRef.current;
-    const centerX = container.clientWidth / 2;
-    const centerY = container.clientHeight / 2;
-    
-    // Calculate the grid center point in canvas coordinates
-    const gridCenterX = GRID_SIZE / 2;
-    const gridCenterY = GRID_SIZE / 2;
-    
-    // Calculate new pan to keep the grid centered during zoom, but constrain top
-    const idealPanY = centerY - gridCenterY * newZoom;
-    const minPanY = 0; // Don't let the grid go above the canvas area
-    
-    const newPan = {
-      x: centerX - gridCenterX * newZoom,
-      y: Math.max(minPanY, idealPanY)
-    };
-    
+    const newZoom = Math.max(0.001, Math.min(50, zoom * zoomFactor)); // Allow much higher zoom and lower zoom
     setZoom(newZoom);
-    setPan(newPan);
-  };
-
-  const centerView = () => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    setPan({ 
-      x: (container.clientWidth - GRID_SIZE * zoom) / 2,
-      y: (container.clientHeight - GRID_SIZE * zoom) / 2
-    });
   };
 
   const resetView = () => {
-    setZoom(1.0);
+    setZoom(0.08);
+    setPan({ x: 0, y: 0 });
     setSelectedPixels([]);
-    if (containerRef.current) {
-      const container = containerRef.current;
-      const centerX = container.clientWidth / 2;
-      const centerY = container.clientHeight / 2;
-      const gridCenterX = GRID_SIZE / 2;
-      const gridCenterY = GRID_SIZE / 2;
-      
-      const idealPanY = centerY - gridCenterY * 1.0;
-      const minPanY = 0;
-      
-      setPan({ 
-        x: centerX - gridCenterX * 1.0,
-        y: Math.max(minPanY, idealPanY)
-      });
-    }
   };
 
   const zoomToFit = () => {
@@ -245,63 +217,39 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       container.clientWidth / GRID_SIZE,
       container.clientHeight / GRID_SIZE
     ) * 0.9;
-    
-    // Set zoom to 100% but use centered positioning with top constraint
-    setZoom(1.0);
-    
-    const centerX = container.clientWidth / 2;
-    const centerY = container.clientHeight / 2;
-    const gridCenterX = GRID_SIZE / 2;
-    const gridCenterY = GRID_SIZE / 2;
-    
-    const idealPanY = centerY - gridCenterY * 1.0;
-    const minPanY = Math.max(0, (container.clientHeight - GRID_SIZE * fitZoom) / 2);
-    
+    setZoom(fitZoom);
     setPan({ 
-      x: centerX - gridCenterX * 1.0,
-      y: Math.max(minPanY, idealPanY)
+      x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
+      y: (container.clientHeight - GRID_SIZE * fitZoom) / 2
     });
   };
 
-  // Initialize canvas size and center the grid using proper constraints
+  // Initialize canvas size
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
         const container = containerRef.current;
         const canvas = canvasRef.current;
         
-        // Account for padding (py-8 = 2rem top + 2rem bottom = 64px total)
-        const paddingOffset = 64;
         canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight - paddingOffset;
+        canvas.height = container.clientHeight;
         
         setCanvasSize({
           width: container.clientWidth,
           height: container.clientHeight
         });
         
-        // Center the grid with top constraint
-        const centerX = container.clientWidth / 2;
-        const centerY = container.clientHeight / 2;
-        const gridCenterX = GRID_SIZE / 2;
-        const gridCenterY = GRID_SIZE / 2;
-        
-        const idealPanY = centerY - gridCenterY * 1.0;
-        const minPanY = 0;
-        
-        setPan({
-          x: centerX - gridCenterX * 1.0,
-          y: Math.max(minPanY, idealPanY)
-        });
-        
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
+        
+        // Redraw after size change
+        setTimeout(() => drawGrid(), 0);
       }
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, []);
+  }, [drawGrid]);
 
   // Draw grid when dependencies change
   useEffect(() => {
@@ -316,11 +264,15 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       <div className="bg-card/50 border-b border-border p-3">
         <div className="flex flex-wrap gap-6 items-center justify-between text-sm">
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <Move className="w-3 h-3 text-muted-foreground" />
+              <span><strong>Drag</strong> to pan around the 10,000x10,000 canvas</span>
+            </div>
             <div>
               <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
             </div>
             <div>
-              <span><strong>Scroll</strong> to zoom in/out (maintains center position)</span>
+              <span><strong>Scroll</strong> to zoom in/out (supports massive zoom levels)</span>
             </div>
           </div>
           <div className="text-muted-foreground">
@@ -333,7 +285,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Square className="w-5 h-5 text-primary" />
-          <span className="font-semibold">1,000 x 1,000 Pixel Grid</span>
+          <span className="font-semibold">10,000 x 10,000 Pixel Grid</span>
           <span className="text-sm text-muted-foreground">
             Zoom: {Math.round(zoom * 100)}%
           </span>
@@ -343,50 +295,14 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              const newZoom = Math.max(1.0, zoom * 0.8);
-              if (containerRef.current) {
-                const container = containerRef.current;
-                const centerX = container.clientWidth / 2;
-                const centerY = container.clientHeight / 2;
-                const gridCenterX = GRID_SIZE / 2;
-                const gridCenterY = GRID_SIZE / 2;
-                
-                const idealPanY = centerY - gridCenterY * newZoom;
-                const minPanY = 0;
-                
-                setPan({
-                  x: centerX - gridCenterX * newZoom,
-                  y: Math.max(minPanY, idealPanY)
-                });
-              }
-              setZoom(newZoom);
-            }}
+            onClick={() => setZoom(Math.max(0.001, zoom * 0.8))}
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              const newZoom = Math.min(50, zoom * 1.25);
-              if (containerRef.current) {
-                const container = containerRef.current;
-                const centerX = container.clientWidth / 2;
-                const centerY = container.clientHeight / 2;
-                const gridCenterX = GRID_SIZE / 2;
-                const gridCenterY = GRID_SIZE / 2;
-                
-                const idealPanY = centerY - gridCenterY * newZoom;
-                const minPanY = 0;
-                
-                setPan({
-                  x: centerX - gridCenterX * newZoom,
-                  y: Math.max(minPanY, idealPanY)
-                });
-              }
-              setZoom(newZoom);
-            }}
+            onClick={() => setZoom(Math.min(50, zoom * 1.25))}
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -401,12 +317,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
       <div 
         ref={containerRef}
-        className="flex-1 relative overflow-hidden bg-background py-8"
+        className="flex-1 relative overflow-hidden bg-slate-900"
         style={{ minHeight: 'calc(100vh - 120px)' }}
       >
         <canvas
           ref={canvasRef}
-          className="absolute inset-x-0 top-8 bottom-8"
+          className="absolute inset-0 cursor-move"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -414,9 +330,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           onWheel={handleWheel}
           style={{ 
             width: '100%', 
-            height: 'calc(100% - 4rem)',
+            height: '100%',
             imageRendering: 'pixelated',
-            cursor: isSelecting ? 'crosshair' : 'default'
+            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'grab'
           }}
         />
         
@@ -424,9 +340,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         <div className="absolute bottom-4 right-4 glass-card p-3">
           <div className="text-sm space-y-1">
             <div className="font-semibold">Grid Stats</div>
-            <div>Total Pixels: <span className="font-mono text-primary">1,000,000</span></div>
+            <div>Total Pixels: <span className="font-mono text-primary">100,000,000</span></div>
             <div>Sold: <span className="font-mono text-blue-400">{soldPixels.length}</span></div>
-            <div>Available: <span className="font-mono text-green-400">999,997</span></div>
+            <div>Available: <span className="font-mono text-green-400">99,999,997</span></div>
             {selectedPixels.length > 0 && (
               <div className="border-t border-border pt-1 mt-2">
                 <div>Selected: <span className="font-mono text-accent">
