@@ -50,6 +50,17 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       return;
     }
 
+    // Ensure canvas drawing buffer matches CSS size to prevent stretching
+    const container = containerRef.current;
+    if (container) {
+      const desiredWidth = container.clientWidth;
+      const desiredHeight = container.clientHeight;
+      if (canvas.width !== desiredWidth || canvas.height !== desiredHeight) {
+        canvas.width = desiredWidth;
+        canvas.height = desiredHeight;
+      }
+    }
+
     console.log("Drawing grid with zoom:", zoom, "pan:", pan);
 
     // Clear canvas with visible background color
