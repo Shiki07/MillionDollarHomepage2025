@@ -285,7 +285,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
               <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
             </div>
             <div>
-              <span><strong>Scroll</strong> to zoom in/out (supports massive zoom levels)</span>
+              <span><strong>Scroll</strong> to zoom in/out</span>
             </div>
           </div>
           <div className="text-muted-foreground">
