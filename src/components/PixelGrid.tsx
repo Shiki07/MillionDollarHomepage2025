@@ -235,23 +235,21 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           height: container.clientHeight
         });
         
-        // Center the grid at 100% zoom
-        setPan({ 
+        // Center the grid based on current zoom
+        const centeredPan = {
           x: (container.clientWidth - GRID_SIZE * zoom) / 2,
           y: (container.clientHeight - GRID_SIZE * zoom) / 2
-        });
+        };
+        setPan(centeredPan);
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
-        
-        // Redraw after size change
-        setTimeout(() => drawGrid(), 0);
       }
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [drawGrid, zoom]);
+  }, [zoom]);
 
   // Draw grid when dependencies change
   useEffect(() => {
