@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
 import { ZoomIn, ZoomOut, RotateCcw, Move, Square } from "lucide-react";
 
 interface PixelData {
@@ -29,6 +28,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStartPan, setDragStartPan] = useState({ x: 0, y: 0 });
 
   // Sample sold pixels for demo
   const [soldPixels] = useState<PixelData[]>([
@@ -40,7 +42,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
   const TOP_PADDING = 30; // Space between instructions and grid
-  const BOTTOM_PADDING = 60; // Space at bottom of viewport (increased for pan control)
+  const BOTTOM_PADDING = 30; // Space at bottom of viewport
 
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
@@ -140,14 +142,21 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     const coords = getCanvasCoordinates(e.clientX, e.clientY);
     
     if (e.shiftKey) {
+      // Shift + drag for pixel selection
       setIsSelecting(true);
       setSelectionStart(coords);
       setSelectedPixels([]); // Clear previous selection
+    } else {
+      // Regular drag for panning
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+      setDragStartPan({ ...pan });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isSelecting) {
+      // Handle pixel selection
       const coords = getCanvasCoordinates(e.clientX, e.clientY);
       const selection = {
         x: Math.min(selectionStart.x, coords.x),
@@ -171,6 +180,25 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           sold: false,
         }]);
       }
+    } else if (isDragging && containerRef.current) {
+      // Handle panning
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+      
+      const container = containerRef.current;
+      const gridWidth = GRID_SIZE * zoom;
+      const gridHeight = GRID_SIZE * zoom;
+      
+      // Calculate pan constraints
+      const maxPanX = Math.min(0, container.clientWidth - gridWidth);
+      const minPanX = Math.max(0, container.clientWidth - gridWidth);
+      const maxPanY = Math.min(TOP_PADDING, container.clientHeight - BOTTOM_PADDING - gridHeight);
+      const minPanY = Math.max(TOP_PADDING, container.clientHeight - BOTTOM_PADDING - gridHeight);
+      
+      const newPanX = Math.max(maxPanX, Math.min(minPanX, dragStartPan.x + deltaX));
+      const newPanY = Math.max(maxPanY, Math.min(minPanY, dragStartPan.y + deltaY));
+      
+      setPan({ x: newPanX, y: newPanY });
     }
   };
 
@@ -179,6 +207,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       onPixelSelect?.(selectedPixels);
     }
     setIsSelecting(false);
+    setIsDragging(false);
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -308,38 +337,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     return () => window.removeEventListener('resize', updateCanvasSize);
   }, []);
 
-  // Calculate if pan control should be visible
-  const shouldShowPanControl = zoom > 1 && containerRef.current && GRID_SIZE * zoom > containerRef.current.clientWidth;
-
-  // Handle slider value change
-  const handlePanSliderChange = (values: number[]) => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    const gridWidth = GRID_SIZE * zoom;
-    const maxPanX = container.clientWidth - gridWidth;
-    const minPanX = 0;
-    
-    if (gridWidth > container.clientWidth) {
-      const progress = values[0] / 100; // Slider value is 0-100
-      const newPanX = maxPanX + progress * (minPanX - maxPanX);
-      setPan(prev => ({ ...prev, x: newPanX }));
-    }
-  };
-
-  // Calculate slider value from current pan
-  const getPanSliderValue = () => {
-    if (!containerRef.current) return [0];
-    const container = containerRef.current;
-    const gridWidth = GRID_SIZE * zoom;
-    const maxPanX = container.clientWidth - gridWidth;
-    const minPanX = 0;
-    
-    if (gridWidth <= container.clientWidth) return [0];
-    
-    const progress = (pan.x - maxPanX) / (minPanX - maxPanX);
-    return [Math.max(0, Math.min(100, progress * 100))];
-  };
-
   // Draw grid when dependencies change
   useEffect(() => {
     console.log("Dependencies changed, redrawing...");
@@ -355,6 +352,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <div className="flex items-center gap-4">
             <div>
               <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
+            </div>
+            <div>
+              <span><strong>Drag</strong> to pan around the grid</span>
             </div>
             <div>
               <span><strong>Scroll</strong> to zoom in/out (maintains center position)</span>
@@ -451,12 +451,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
-          style={{ 
-            width: '100%',
-            bottom: BOTTOM_PADDING,
-            imageRendering: 'pixelated',
-            cursor: isSelecting ? 'crosshair' : 'default'
-          }}
+            style={{ 
+              width: '100%',
+              bottom: BOTTOM_PADDING,
+              imageRendering: 'pixelated',
+              cursor: isSelecting ? 'crosshair' : isDragging ? 'grabbing' : 'grab'
+            }}
         />
         
         {/* Stats overlay - moved to bottom right */}
@@ -482,25 +482,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
             Zoom: <span className="font-mono text-primary">{Math.round(zoom * 100)}%</span>
           </div>
         </div>
-
-        {/* Pan control slider - only visible when zoomed in */}
-        {shouldShowPanControl && (
-          <div className="absolute bottom-0 left-0 right-0 h-12 flex items-center justify-center bg-card/90 backdrop-blur-sm border-t border-border px-6">
-            <div className="flex items-center gap-3 w-full max-w-4xl">
-              <Move className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              <Slider
-                value={getPanSliderValue()}
-                onValueChange={handlePanSliderChange}
-                max={100}
-                step={1}
-                className="flex-1"
-              />
-              <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
-                Pan: {Math.round(getPanSliderValue()[0])}%
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </Card>
     </div>
