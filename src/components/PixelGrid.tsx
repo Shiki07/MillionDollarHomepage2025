@@ -33,12 +33,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
   // Sample sold pixels for demo
   const [soldPixels] = useState<PixelData[]>([
-    { id: '1', x: 1000, y: 1000, width: 200, height: 200, sold: true, owner: 'Demo User' },
-    { id: '2', x: 3000, y: 2000, width: 100, height: 100, sold: true, owner: 'Test Corp' },
-    { id: '3', x: 5000, y: 5000, width: 500, height: 300, sold: true, owner: 'Big Brand' },
+    { id: '1', x: 100, y: 100, width: 200, height: 200, sold: true, owner: 'Demo User' },
+    { id: '2', x: 300, y: 200, width: 100, height: 100, sold: true, owner: 'Test Corp' },
+    { id: '3', x: 500, y: 500, width: 200, height: 150, sold: true, owner: 'Big Brand' },
   ]);
 
-  const GRID_SIZE = 10000;
+  const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
 
   const drawGrid = useCallback(() => {
@@ -258,7 +258,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <Move className="w-3 h-3 text-muted-foreground" />
-              <span><strong>Drag</strong> to pan around the 10,000x10,000 canvas</span>
+              <span><strong>Drag</strong> to pan around the 1,000x1,000 canvas</span>
             </div>
             <div>
               <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
@@ -277,7 +277,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Square className="w-5 h-5 text-primary" />
-          <span className="font-semibold">10,000 x 10,000 Pixel Grid</span>
+          <span className="font-semibold">1,000 x 1,000 Pixel Grid</span>
           <span className="text-sm text-muted-foreground">
             Zoom: {Math.round(zoom * 100)}%
           </span>
@@ -332,9 +332,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         <div className="absolute bottom-4 right-4 glass-card p-3">
           <div className="text-sm space-y-1">
             <div className="font-semibold">Grid Stats</div>
-            <div>Total Pixels: <span className="font-mono text-primary">100,000,000</span></div>
+            <div>Total Pixels: <span className="font-mono text-primary">1,000,000</span></div>
             <div>Sold: <span className="font-mono text-blue-400">{soldPixels.length}</span></div>
-            <div>Available: <span className="font-mono text-green-400">99,999,997</span></div>
+            <div>Available: <span className="font-mono text-green-400">999,997</span></div>
             {selectedPixels.length > 0 && (
               <div className="border-t border-border pt-1 mt-2">
                 <div>Selected: <span className="font-mono text-accent">
