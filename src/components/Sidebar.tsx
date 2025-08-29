@@ -29,7 +29,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
   const pixelCount = selectedPixels.reduce((sum, pixel) => 
     sum + (pixel.width * pixel.height), 0
   );
-  const price = pixelCount * 0.10; // $0.10 per pixel
+  const price = pixelCount * 1.00; // $1.00 per pixel
 
   return (
     <div className="w-full border-b border-border bg-card/50 p-3 space-y-4">
@@ -93,7 +93,7 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <ImageIcon className="w-4 h-4" />
-              <span>Hold Shift and drag to select pixel areas • Minimum 10x10 pixels ($10)</span>
+              <span>Hold Shift and drag to select pixel areas • Minimum 10x10 pixels ($100)</span>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
