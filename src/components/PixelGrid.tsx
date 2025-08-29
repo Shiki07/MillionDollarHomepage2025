@@ -39,6 +39,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
   const TOP_PADDING = 30; // Space between instructions and grid
+  const BOTTOM_PADDING = 30; // Space at bottom of viewport
 
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
@@ -197,13 +198,14 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     const gridCenterX = GRID_SIZE / 2;
     const gridCenterY = GRID_SIZE / 2;
     
-    // Calculate new pan to keep the grid centered during zoom, but constrain top
+    // Calculate new pan to keep the grid centered during zoom, but constrain top and bottom
     const idealPanY = centerY - gridCenterY * newZoom;
     const minPanY = TOP_PADDING; // Keep space between instructions and grid
+    const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * newZoom; // Keep space at bottom
     
     const newPan = {
       x: centerX - gridCenterX * newZoom,
-      y: Math.max(minPanY, idealPanY)
+      y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
     };
     
     setZoom(newZoom);
@@ -231,10 +233,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       
       const idealPanY = centerY - gridCenterY * 1.0;
       const minPanY = TOP_PADDING;
+      const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * 1.0;
       
       setPan({ 
         x: centerX - gridCenterX * 1.0,
-        y: Math.max(minPanY, idealPanY)
+        y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
       });
     }
   };
@@ -257,10 +260,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     
     const idealPanY = centerY - gridCenterY * 1.0;
     const minPanY = Math.max(TOP_PADDING, (container.clientHeight - GRID_SIZE * fitZoom) / 2);
+    const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * 1.0;
     
     setPan({ 
       x: centerX - gridCenterX * 1.0,
-      y: Math.max(minPanY, idealPanY)
+      y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
     });
   };
 
@@ -287,10 +291,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         
         const idealPanY = centerY - gridCenterY * 1.0;
         const minPanY = TOP_PADDING;
+        const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * 1.0;
         
         setPan({
           x: centerX - gridCenterX * 1.0,
-          y: Math.max(minPanY, idealPanY)
+          y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
         });
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
@@ -353,10 +358,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
                 
                 const idealPanY = centerY - gridCenterY * newZoom;
                 const minPanY = TOP_PADDING;
+                const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * newZoom;
                 
                 setPan({
                   x: centerX - gridCenterX * newZoom,
-                  y: Math.max(minPanY, idealPanY)
+                  y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
                 });
               }
               setZoom(newZoom);
@@ -378,10 +384,11 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
                 
                 const idealPanY = centerY - gridCenterY * newZoom;
                 const minPanY = TOP_PADDING;
+                const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * newZoom;
                 
                 setPan({
                   x: centerX - gridCenterX * newZoom,
-                  y: Math.max(minPanY, idealPanY)
+                  y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
                 });
               }
               setZoom(newZoom);
