@@ -220,7 +220,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     });
   };
 
-  // Initialize canvas size and center the grid
+  // Initialize canvas size and center the grid using fit logic
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -235,10 +235,16 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           height: container.clientHeight
         });
         
-        // Center the grid based on current zoom
+        // Use fit logic to center the grid properly
+        const fitZoom = Math.min(
+          container.clientWidth / GRID_SIZE,
+          container.clientHeight / GRID_SIZE
+        ) * 0.9;
+        
+        // Center using the fit zoom calculation but keep actual zoom at 1.0
         const centeredPan = {
-          x: (container.clientWidth - GRID_SIZE * zoom) / 2,
-          y: (container.clientHeight - GRID_SIZE * zoom) / 2
+          x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
+          y: (container.clientHeight - GRID_SIZE * fitZoom) / 2
         };
         setPan(centeredPan);
         
@@ -249,7 +255,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [zoom]);
+  }, []);
 
   // Draw grid when dependencies change
   useEffect(() => {
