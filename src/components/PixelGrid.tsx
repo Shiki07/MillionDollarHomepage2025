@@ -22,7 +22,7 @@ interface PixelGridProps {
 export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(0.08); // Start even more zoomed out
+  const [zoom, setZoom] = useState(1.0); // Start at 100% zoom
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -192,12 +192,12 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.001, Math.min(50, zoom * zoomFactor)); // Allow much higher zoom and lower zoom
+    const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor)); // Minimum 100% zoom
     setZoom(newZoom);
   };
 
   const resetView = () => {
-    setZoom(0.08);
+    setZoom(1.0);
     setPan({ x: 0, y: 0 });
     setSelectedPixels([]);
   };
@@ -287,7 +287,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setZoom(Math.max(0.001, zoom * 0.8))}
+            onClick={() => setZoom(Math.max(1.0, zoom * 0.8))}
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
