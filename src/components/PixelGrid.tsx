@@ -40,8 +40,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const PIXEL_SIZE = 1;
   const TOP_PADDING = 30; // Space between instructions and grid
   const BOTTOM_PADDING = 30; // Space at bottom of viewport
-  const HEADER_OFFSET = 140; // Approx header/toolbars height above canvas
-  const [viewportHeight, setViewportHeight] = useState<number>(typeof window !== 'undefined' ? window.innerHeight : 800);
 
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
@@ -277,9 +275,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         const container = containerRef.current;
         const canvas = canvasRef.current;
         
-        // Update viewport height for dynamic layout
-        setViewportHeight(window.innerHeight);
-        
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
         
@@ -288,7 +283,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           height: container.clientHeight
         });
         
-        // Center the grid with top/bottom constraints
+        // Center the grid with top constraint
         const centerX = container.clientWidth / 2;
         const centerY = container.clientHeight / 2;
         const gridCenterX = GRID_SIZE / 2;
@@ -310,7 +305,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [zoom]);
+  }, []);
 
   // Draw grid when dependencies change
   useEffect(() => {
@@ -320,7 +315,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   }, [drawGrid]);
 
   return (
-    <div className="flex flex-col" style={{ minHeight: Math.max(viewportHeight, GRID_SIZE * zoom + TOP_PADDING + BOTTOM_PADDING + HEADER_OFFSET) }}>
+    <div className="flex flex-col" style={{ minHeight: `calc(100vh + ${Math.max(200, zoom * 300)}px)` }}>
       {/* Instructions at the very top */}
       <div className="bg-card/50 border-b border-border p-3">
         <div className="flex flex-wrap gap-6 items-center justify-between text-sm">
@@ -413,7 +408,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       <div 
         ref={containerRef}
         className="flex-1 relative overflow-hidden bg-slate-900"
-        style={{ minHeight: Math.max(viewportHeight - HEADER_OFFSET, GRID_SIZE * zoom + TOP_PADDING + BOTTOM_PADDING) }}
+        style={{ minHeight: 'calc(100vh - 120px)' }}
       >
         <canvas
           ref={canvasRef}
