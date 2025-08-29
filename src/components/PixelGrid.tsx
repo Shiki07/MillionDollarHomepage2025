@@ -32,11 +32,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
 
   // Sample sold pixels for demo
-  const [soldPixels] = useState<PixelData[]>([
-    { id: '1', x: 100, y: 100, width: 200, height: 200, sold: true, owner: 'Demo User' },
-    { id: '2', x: 300, y: 200, width: 100, height: 100, sold: true, owner: 'Test Corp' },
-    { id: '3', x: 500, y: 500, width: 300, height: 200, sold: true, owner: 'Big Brand' },
-  ]);
+  const [soldPixels] = useState<PixelData[]>([]);
 
   const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
@@ -343,7 +339,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
             <div className="font-semibold">Grid Stats</div>
             <div>Total Pixels: <span className="font-mono text-primary">1,000,000</span></div>
             <div>Sold: <span className="font-mono text-muted-foreground">{soldPixels.length}</span></div>
-            <div>Available: <span className="font-mono text-green-400">999,997</span></div>
+            <div>Available: <span className="font-mono text-green-400">1,000,000</span></div>
             {selectedPixels.length > 0 && (
               <div className="border-t border-border pt-1 mt-2">
                 <div>Selected: <span className="font-mono text-accent">
