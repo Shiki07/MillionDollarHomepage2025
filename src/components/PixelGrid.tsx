@@ -412,15 +412,15 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       >
         <canvas
           ref={canvasRef}
-          className="absolute inset-0"
+          className="absolute left-0 right-0 top-0"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
           style={{ 
-            width: '100%', 
-            height: '100%',
+            width: '100%',
+            bottom: BOTTOM_PADDING,
             imageRendering: 'pixelated',
             cursor: isSelecting ? 'crosshair' : 'default'
           }}
