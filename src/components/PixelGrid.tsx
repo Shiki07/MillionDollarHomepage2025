@@ -213,7 +213,9 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       container.clientWidth / GRID_SIZE,
       container.clientHeight / GRID_SIZE
     ) * 0.9;
-    setZoom(fitZoom);
+    
+    // Set zoom to 100% but use fit centering logic
+    setZoom(1.0);
     setPan({ 
       x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
       y: (container.clientHeight - GRID_SIZE * fitZoom) / 2
