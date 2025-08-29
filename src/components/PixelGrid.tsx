@@ -23,14 +23,13 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1.0); // Start at 100% zoom
-  const [pan, setPan] = useState({ x: 0, y: 0 }); // Will be set to center the grid
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [dragStartPan, setDragStartPan] = useState({ x: 0, y: 0 });
 
   // Sample sold pixels for demo
   const [soldPixels] = useState<PixelData[]>([
@@ -41,8 +40,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
   const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
-  const TOP_PADDING = 30; // Space between instructions and grid
-  const BOTTOM_PADDING = 30; // Space at bottom of viewport
 
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
@@ -57,7 +54,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       return;
     }
 
-  console.log("Drawing grid with zoom:", zoom, "pan:", pan);
+    console.log("Drawing grid with zoom:", zoom, "pan:", pan);
 
     // Clear canvas with visible background color
     ctx.fillStyle = '#1e293b'; // Slate-800 background
@@ -142,21 +139,22 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     const coords = getCanvasCoordinates(e.clientX, e.clientY);
     
     if (e.shiftKey) {
-      // Shift + drag for pixel selection
       setIsSelecting(true);
       setSelectionStart(coords);
       setSelectedPixels([]); // Clear previous selection
     } else {
-      // Regular drag for panning
       setIsDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-      setDragStartPan({ ...pan });
+      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isSelecting) {
-      // Handle pixel selection
+    if (isDragging) {
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    } else if (isSelecting) {
       const coords = getCanvasCoordinates(e.clientX, e.clientY);
       const selection = {
         x: Math.min(selectionStart.x, coords.x),
@@ -180,25 +178,6 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           sold: false,
         }]);
       }
-    } else if (isDragging && containerRef.current) {
-      // Handle panning
-      const deltaX = e.clientX - dragStart.x;
-      const deltaY = e.clientY - dragStart.y;
-      
-      const container = containerRef.current;
-      const gridWidth = GRID_SIZE * zoom;
-      const gridHeight = GRID_SIZE * zoom;
-      
-      // Calculate pan constraints
-      const maxPanX = Math.min(0, container.clientWidth - gridWidth);
-      const minPanX = Math.max(0, container.clientWidth - gridWidth);
-      const maxPanY = Math.min(TOP_PADDING, container.clientHeight - BOTTOM_PADDING - gridHeight);
-      const minPanY = Math.max(TOP_PADDING, container.clientHeight - BOTTOM_PADDING - gridHeight);
-      
-      const newPanX = Math.max(maxPanX, Math.min(minPanX, dragStartPan.x + deltaX));
-      const newPanY = Math.max(maxPanY, Math.min(minPanY, dragStartPan.y + deltaY));
-      
-      setPan({ x: newPanX, y: newPanY });
     }
   };
 
@@ -206,70 +185,21 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     if (isSelecting && selectedPixels.length > 0) {
       onPixelSelect?.(selectedPixels);
     }
-    setIsSelecting(false);
     setIsDragging(false);
+    setIsSelecting(false);
   };
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor));
-    
-    if (!containerRef.current) {
-      setZoom(newZoom);
-      return;
-    }
-    
-    const container = containerRef.current;
-    const centerX = container.clientWidth / 2;
-    const centerY = container.clientHeight / 2;
-    
-    // Calculate the grid center point in canvas coordinates
-    const gridCenterX = GRID_SIZE / 2;
-    const gridCenterY = GRID_SIZE / 2;
-    
-    // Calculate new pan to keep the grid centered during zoom, but constrain top and bottom
-    const idealPanY = centerY - gridCenterY * newZoom;
-    const minPanY = TOP_PADDING; // Keep space between instructions and grid
-    const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * newZoom; // Keep space at bottom
-    
-    const newPan = {
-      x: centerX - gridCenterX * newZoom,
-      y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
-    };
-    
+    const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor)); // Minimum 100% zoom
     setZoom(newZoom);
-    setPan(newPan);
-  };
-
-  const centerView = () => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    setPan({ 
-      x: (container.clientWidth - GRID_SIZE * zoom) / 2,
-      y: (container.clientHeight - GRID_SIZE * zoom) / 2
-    });
   };
 
   const resetView = () => {
     setZoom(1.0);
+    setPan({ x: 0, y: 0 });
     setSelectedPixels([]);
-    if (containerRef.current) {
-      const container = containerRef.current;
-      const centerX = container.clientWidth / 2;
-      const centerY = container.clientHeight / 2;
-      const gridCenterX = GRID_SIZE / 2;
-      const gridCenterY = GRID_SIZE / 2;
-      
-      const idealPanY = centerY - gridCenterY * 1.0;
-      const minPanY = TOP_PADDING;
-      const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * 1.0;
-      
-      setPan({ 
-        x: centerX - gridCenterX * 1.0,
-        y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
-      });
-    }
   };
 
   const zoomToFit = () => {
@@ -279,26 +209,14 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       container.clientWidth / GRID_SIZE,
       container.clientHeight / GRID_SIZE
     ) * 0.9;
-    
-    // Set zoom to 100% but use centered positioning with top constraint
-    setZoom(1.0);
-    
-    const centerX = container.clientWidth / 2;
-    const centerY = container.clientHeight / 2;
-    const gridCenterX = GRID_SIZE / 2;
-    const gridCenterY = GRID_SIZE / 2;
-    
-    const idealPanY = centerY - gridCenterY * 1.0;
-    const minPanY = Math.max(TOP_PADDING, (container.clientHeight - GRID_SIZE * fitZoom) / 2);
-    const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * 1.0;
-    
+    setZoom(fitZoom);
     setPan({ 
-      x: centerX - gridCenterX * 1.0,
-      y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
+      x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
+      y: (container.clientHeight - GRID_SIZE * fitZoom) / 2
     });
   };
 
-  // Initialize canvas size and center the grid using proper constraints
+  // Initialize canvas size
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -313,29 +231,17 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           height: container.clientHeight
         });
         
-        // Center the grid with top constraint
-        const centerX = container.clientWidth / 2;
-        const centerY = container.clientHeight / 2;
-        const gridCenterX = GRID_SIZE / 2;
-        const gridCenterY = GRID_SIZE / 2;
-        
-        const idealPanY = centerY - gridCenterY * 1.0;
-        const minPanY = TOP_PADDING;
-        const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * 1.0;
-        
-        setPan({
-          x: centerX - gridCenterX * 1.0,
-          y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
-        });
-        
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
+        
+        // Redraw after size change
+        setTimeout(() => drawGrid(), 0);
       }
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, []);
+  }, [drawGrid]);
 
   // Draw grid when dependencies change
   useEffect(() => {
@@ -345,19 +251,20 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   }, [drawGrid]);
 
   return (
-    <div className="flex flex-col" style={{ minHeight: `calc(100vh + ${Math.max(200, zoom * 300)}px)` }}>
+    <div className="flex flex-col h-full">
       {/* Instructions at the very top */}
       <div className="bg-card/50 border-b border-border p-3">
         <div className="flex flex-wrap gap-6 items-center justify-between text-sm">
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <Move className="w-3 h-3 text-muted-foreground" />
+              <span><strong>Drag</strong> to pan around the 1,000x1,000 canvas</span>
+            </div>
             <div>
               <span><strong>Shift + Drag</strong> to select pixel areas for purchase</span>
             </div>
             <div>
-              <span><strong>Drag</strong> to pan around the grid</span>
-            </div>
-            <div>
-              <span><strong>Scroll</strong> to zoom in/out (maintains center position)</span>
+              <span><strong>Scroll</strong> to zoom in/out (supports massive zoom levels)</span>
             </div>
           </div>
           <div className="text-muted-foreground">
@@ -380,52 +287,14 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              const newZoom = Math.max(1.0, zoom * 0.8);
-              if (containerRef.current) {
-                const container = containerRef.current;
-                const centerX = container.clientWidth / 2;
-                const centerY = container.clientHeight / 2;
-                const gridCenterX = GRID_SIZE / 2;
-                const gridCenterY = GRID_SIZE / 2;
-                
-                const idealPanY = centerY - gridCenterY * newZoom;
-                const minPanY = TOP_PADDING;
-                const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * newZoom;
-                
-                setPan({
-                  x: centerX - gridCenterX * newZoom,
-                  y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
-                });
-              }
-              setZoom(newZoom);
-            }}
+            onClick={() => setZoom(Math.max(1.0, zoom * 0.8))}
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              const newZoom = Math.min(50, zoom * 1.25);
-              if (containerRef.current) {
-                const container = containerRef.current;
-                const centerX = container.clientWidth / 2;
-                const centerY = container.clientHeight / 2;
-                const gridCenterX = GRID_SIZE / 2;
-                const gridCenterY = GRID_SIZE / 2;
-                
-                const idealPanY = centerY - gridCenterY * newZoom;
-                const minPanY = TOP_PADDING;
-                const maxPanY = container.clientHeight - BOTTOM_PADDING - GRID_SIZE * newZoom;
-                
-                setPan({
-                  x: centerX - gridCenterX * newZoom,
-                  y: Math.max(minPanY, Math.min(maxPanY, idealPanY))
-                });
-              }
-              setZoom(newZoom);
-            }}
+            onClick={() => setZoom(Math.min(50, zoom * 1.25))}
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
@@ -445,18 +314,18 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       >
         <canvas
           ref={canvasRef}
-          className="absolute left-0 right-0 top-0"
+          className="absolute inset-0 cursor-move"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
-            style={{ 
-              width: '100%',
-              bottom: BOTTOM_PADDING,
-              imageRendering: 'pixelated',
-              cursor: isSelecting ? 'crosshair' : isDragging ? 'grabbing' : 'grab'
-            }}
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            imageRendering: 'pixelated',
+            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'grab'
+          }}
         />
         
         {/* Stats overlay - moved to bottom right */}
