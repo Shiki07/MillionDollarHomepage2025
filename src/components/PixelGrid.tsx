@@ -205,10 +205,10 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const zoomToFit = () => {
     if (!containerRef.current) return;
     const container = containerRef.current;
-    const fitZoom = Math.min(
+    const fitZoom = Math.max(1.0, Math.min(
       container.clientWidth / GRID_SIZE,
       container.clientHeight / GRID_SIZE
-    ) * 0.9;
+    ) * 0.9);
     setZoom(fitZoom);
     setPan({ 
       x: (container.clientWidth - GRID_SIZE * fitZoom) / 2,
@@ -216,7 +216,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
     });
   };
 
-  // Initialize canvas size and set to fit view
+  // Initialize canvas size
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -232,19 +232,21 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         });
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
-        
-        // Set initial view to fit and redraw
-        setTimeout(() => {
-          zoomToFit();
-          drawGrid();
-        }, 0);
       }
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [drawGrid]);
+  }, []); // Remove drawGrid dependency
+
+  // Initial setup - set to fit view once on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      zoomToFit();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Draw grid when dependencies change
   useEffect(() => {
