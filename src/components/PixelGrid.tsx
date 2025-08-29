@@ -315,7 +315,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   }, [drawGrid]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ minHeight: `calc(100vh + ${Math.max(200, zoom * 300)}px)` }}>
       {/* Instructions at the very top */}
       <div className="bg-card/50 border-b border-border p-3">
         <div className="flex flex-wrap gap-6 items-center justify-between text-sm">
