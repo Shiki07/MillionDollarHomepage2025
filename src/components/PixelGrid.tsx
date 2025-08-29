@@ -233,32 +233,30 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
         
-        // Auto-fit the grid on initial load
-        const fitZoom = Math.min(
-          container.clientWidth / GRID_SIZE,
-          container.clientHeight / GRID_SIZE
-        ) * 0.9;
-        const finalZoom = Math.max(1.0, fitZoom); // Minimum 100% zoom
-        setZoom(finalZoom);
-        setPan({ 
-          x: (container.clientWidth - GRID_SIZE * finalZoom) / 2,
-          y: (container.clientHeight - GRID_SIZE * finalZoom) / 2
-        });
-        
-        // Redraw after size change
-        setTimeout(() => drawGrid(), 0);
+        // Auto-fit the grid on initial load only
+        if (zoom === 1.0 && pan.x === 0 && pan.y === 0) {
+          const fitZoom = Math.min(
+            container.clientWidth / GRID_SIZE,
+            container.clientHeight / GRID_SIZE
+          ) * 0.9;
+          const finalZoom = Math.max(1.0, fitZoom);
+          setZoom(finalZoom);
+          setPan({ 
+            x: (container.clientWidth - GRID_SIZE * finalZoom) / 2,
+            y: (container.clientHeight - GRID_SIZE * finalZoom) / 2
+          });
+        }
       }
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [drawGrid]);
+  }, []); // Remove drawGrid dependency
 
-  // Draw grid when dependencies change
+  // Draw grid when dependencies change - throttled to prevent excessive rendering
   useEffect(() => {
-    console.log("Dependencies changed, redrawing...");
-    const timeoutId = setTimeout(() => drawGrid(), 10);
+    const timeoutId = setTimeout(() => drawGrid(), 16); // ~60fps throttling
     return () => clearTimeout(timeoutId);
   }, [drawGrid]);
 
