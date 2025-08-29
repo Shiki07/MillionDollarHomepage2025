@@ -52,7 +52,7 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       return;
     }
 
-    console.log("Drawing grid with zoom:", zoom, "pan:", pan);
+  console.log("Drawing grid with zoom:", zoom, "pan:", pan);
 
     // Clear canvas with visible background color
     ctx.fillStyle = '#1e293b'; // Slate-800 background
