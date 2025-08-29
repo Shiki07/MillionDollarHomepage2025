@@ -233,6 +233,18 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
         
         console.log("Canvas size updated:", canvas.width, "x", canvas.height);
         
+        // Auto-fit the grid on initial load
+        const fitZoom = Math.min(
+          container.clientWidth / GRID_SIZE,
+          container.clientHeight / GRID_SIZE
+        ) * 0.9;
+        const finalZoom = Math.max(1.0, fitZoom); // Minimum 100% zoom
+        setZoom(finalZoom);
+        setPan({ 
+          x: (container.clientWidth - GRID_SIZE * finalZoom) / 2,
+          y: (container.clientHeight - GRID_SIZE * finalZoom) / 2
+        });
+        
         // Redraw after size change
         setTimeout(() => drawGrid(), 0);
       }
