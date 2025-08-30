@@ -73,21 +73,94 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
           </div>
         </div>
 
-        {/* Selection Info or Quick Actions */}
+        {/* Selection Info or Purchase Form */}
         {selectedPixels.length > 0 ? (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-4 h-4 text-accent" />
-              <span className="font-semibold">Purchase Pixels</span>
+          <div className="w-full space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-accent" />
+                <span className="font-semibold">Purchase Pixels</span>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div>Selected: <span className="font-mono">{pixelCount.toLocaleString()}</span></div>
+                <div>Total: <span className="font-mono text-accent">${price.toFixed(2)}</span></div>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div>Selected: <span className="font-mono">{pixelCount.toLocaleString()}</span></div>
-              <div>Total: <span className="font-mono text-accent">${price.toFixed(2)}</span></div>
-            </div>
-            <Button className="glow-button">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Purchase for ${price.toFixed(2)}
-            </Button>
+
+            {/* Purchase Form */}
+            <Card className="p-4 glass-card">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="imageUpload">Upload Image</Label>
+                  <Input
+                    id="imageUpload"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            imageUrl: event.target?.result as string 
+                          }));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  {formData.imageUrl && (
+                    <div className="mt-2">
+                      <img 
+                        src={formData.imageUrl} 
+                        alt="Preview" 
+                        className="w-20 h-20 object-cover rounded border"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="url">Website URL (optional)</Label>
+                  <Input
+                    id="url"
+                    type="url"
+                    placeholder="https://your-website.com"
+                    value={formData.url}
+                    onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="alt">Alt Text</Label>
+                  <Input
+                    id="alt"
+                    placeholder="Describe your image"
+                    value={formData.alt}
+                    onChange={(e) => setFormData(prev => ({ ...prev, alt: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your-email@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button className="glow-button">
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Purchase for ${price.toFixed(2)}
+                </Button>
+              </div>
+            </Card>
           </div>
         ) : (
           <div className="flex items-center gap-4">

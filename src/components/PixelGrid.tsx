@@ -12,14 +12,16 @@ interface PixelData {
   owner?: string;
   imageUrl?: string;
   url?: string;
+  alt?: string;
   sold: boolean;
 }
 
 interface PixelGridProps {
   onPixelSelect?: (pixels: PixelData[]) => void;
+  soldPixelsWithContent?: PixelData[];
 }
 
-export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
+export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [] }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1.0); // Start at 100% zoom
@@ -30,9 +32,66 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [loadedImages, setLoadedImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
-  // Sample sold pixels for demo
-  const [soldPixels] = useState<PixelData[]>([]);
+  // Sample sold pixels for demo - now using soldPixelsWithContent prop
+  const soldPixels = soldPixelsWithContent;
+
+  // Load images for sold pixels
+  useEffect(() => {
+    const imageMap = new Map<string, HTMLImageElement>();
+    
+    soldPixels.forEach(pixel => {
+      if (pixel.imageUrl && !loadedImages.has(pixel.id)) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          imageMap.set(pixel.id, img);
+          setLoadedImages(prev => new Map(prev).set(pixel.id, img));
+        };
+        img.onerror = () => {
+          console.warn(`Failed to load image for pixel ${pixel.id}`);
+        };
+        img.src = pixel.imageUrl;
+      }
+    });
+  }, [soldPixels, loadedImages]);
+
+  // Resize image to fit pixel area
+  const resizeImageToFit = (img: HTMLImageElement, width: number, height: number) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return img;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // Calculate aspect ratios
+    const imgAspectRatio = img.width / img.height;
+    const targetAspectRatio = width / height;
+
+    let drawWidth, drawHeight, drawX, drawY;
+
+    if (imgAspectRatio > targetAspectRatio) {
+      // Image is wider than target
+      drawWidth = width;
+      drawHeight = width / imgAspectRatio;
+      drawX = 0;
+      drawY = (height - drawHeight) / 2;
+    } else {
+      // Image is taller than target
+      drawHeight = height;
+      drawWidth = height * imgAspectRatio;
+      drawX = (width - drawWidth) / 2;
+      drawY = 0;
+    }
+
+    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+    
+    const resizedImg = new Image();
+    resizedImg.src = canvas.toDataURL();
+    return resizedImg;
+  };
 
   const GRID_SIZE = 1000;
   const PIXEL_SIZE = 1;
@@ -105,10 +164,18 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
       }
     }
 
-    // Draw sold pixels
+    // Draw sold pixels with images or fallback color
     soldPixels.forEach(pixel => {
-      ctx.fillStyle = '#6b7280'; // Gray for sold pixels
-      ctx.fillRect(pixel.x, pixel.y, pixel.width, pixel.height);
+      const loadedImg = loadedImages.get(pixel.id);
+      
+      if (loadedImg && pixel.imageUrl) {
+        // Draw the image, resized to fit the pixel area
+        ctx.drawImage(loadedImg, pixel.x, pixel.y, pixel.width, pixel.height);
+      } else {
+        // Fallback to colored rectangle
+        ctx.fillStyle = '#6b7280'; // Gray for sold pixels
+        ctx.fillRect(pixel.x, pixel.y, pixel.width, pixel.height);
+      }
       
       // Add border to sold pixels
       ctx.strokeStyle = '#9ca3af';
@@ -147,6 +214,20 @@ export const PixelGrid = ({ onPixelSelect }: PixelGridProps) => {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const coords = getCanvasCoordinates(e.clientX, e.clientY);
+    
+    // Check if clicking on a sold pixel with a URL
+    const clickedPixel = soldPixels.find(pixel => 
+      coords.x >= pixel.x && 
+      coords.x <= pixel.x + pixel.width &&
+      coords.y >= pixel.y && 
+      coords.y <= pixel.y + pixel.height
+    );
+    
+    if (clickedPixel && clickedPixel.url && !e.shiftKey) {
+      // Open URL in new tab
+      window.open(clickedPixel.url, '_blank');
+      return;
+    }
     
     if (e.shiftKey) {
       setIsSelecting(true);
