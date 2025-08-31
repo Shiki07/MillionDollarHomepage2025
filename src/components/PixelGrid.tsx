@@ -206,7 +206,7 @@ useEffect(() => {
 
     ctx.restore();
     console.log("Grid drawn successfully");
-  }, [zoom, pan, soldPixels, selectedPixels]);
+  }, [zoom, pan, soldPixels, selectedPixels, loadedImages]);
 
   const getCanvasCoordinates = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
