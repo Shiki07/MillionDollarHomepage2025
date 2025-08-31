@@ -61,42 +61,22 @@ export type Database = {
       }
     }
     Views: {
-      public_pixels: {
-        Row: {
-          alt_text: string | null
-          amount: number | null
-          created_at: string | null
-          currency: string | null
-          id: string | null
-          image_url: string | null
-          pixels: Json | null
-          website_url: string | null
-        }
-        Insert: {
-          alt_text?: string | null
-          amount?: number | null
-          created_at?: string | null
-          currency?: string | null
-          id?: string | null
-          image_url?: string | null
-          pixels?: Json | null
-          website_url?: string | null
-        }
-        Update: {
-          alt_text?: string | null
-          amount?: number | null
-          created_at?: string | null
-          currency?: string | null
-          id?: string | null
-          image_url?: string | null
-          pixels?: Json | null
-          website_url?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_pixels: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          alt_text: string
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          image_url: string
+          pixels: Json
+          website_url: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
