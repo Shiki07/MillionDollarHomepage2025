@@ -1,13 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PixelGrid } from "@/components/PixelGrid";
 import { Sidebar } from "@/components/Sidebar";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [selectedPixels, setSelectedPixels] = useState([]);
-  
-// Empty sold pixels - no demo content
-const [soldPixelsWithContent, setSoldPixelsWithContent] = useState([]);
-const [clearSelectionKey, setClearSelectionKey] = useState(0);
+  const [soldPixelsWithContent, setSoldPixelsWithContent] = useState([]);
+  const [clearSelectionKey, setClearSelectionKey] = useState(0);
+
+  // Load sold pixels from database on component mount
+  useEffect(() => {
+    const loadSoldPixels = async () => {
+      try {
+        const { data: purchases, error } = await supabase
+          .from('pixel_purchases')
+          .select('*')
+          .eq('status', 'paid');
+
+        if (error) {
+          console.error('Error loading sold pixels:', error);
+          return;
+        }
+
+        if (purchases) {
+          const soldPixels = purchases.map(purchase => {
+            const pixels = purchase.pixels as any[];
+            return {
+              id: purchase.id,
+              x: Math.min(...pixels.map((p: any) => p.x)),
+              y: Math.min(...pixels.map((p: any) => p.y)),
+              width: Math.max(...pixels.map((p: any) => p.x + p.width)) - Math.min(...pixels.map((p: any) => p.x)),
+              height: Math.max(...pixels.map((p: any) => p.y + p.height)) - Math.min(...pixels.map((p: any) => p.y)),
+              imageUrl: purchase.image_url,
+              url: purchase.website_url,
+              alt: purchase.alt_text,
+              sold: true,
+              owner: purchase.email
+            };
+          });
+          
+          setSoldPixelsWithContent(soldPixels);
+        }
+      } catch (error) {
+        console.error('Error loading sold pixels:', error);
+      }
+    };
+
+    loadSoldPixels();
+  }, []);
 
   const handleTestImage = (imageData: { imageUrl: string; url: string; alt: string }) => {
     if (selectedPixels.length === 0) return;

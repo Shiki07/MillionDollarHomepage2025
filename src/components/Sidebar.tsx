@@ -13,6 +13,8 @@ import {
   DollarSign,
   BarChart3
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SidebarProps {
   selectedPixels: any[];
@@ -26,11 +28,67 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
     alt: '',
     email: ''
   });
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const { toast } = useToast();
 
   const pixelCount = selectedPixels.reduce((sum, pixel) => 
     sum + (pixel.width * pixel.height), 0
   );
   const price = pixelCount * 1; // $1 per pixel
+
+  const handlePurchase = async () => {
+    if (!formData.email || !formData.imageUrl || !formData.url || !formData.alt) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields before purchasing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (pixelCount < 100) {
+      toast({
+        title: "Minimum Purchase",
+        description: "Minimum purchase is 100 pixels ($100).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          email: formData.email,
+          imageUrl: formData.imageUrl,
+          url: formData.url,
+          alt: formData.alt,
+          pixels: selectedPixels
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+        toast({
+          title: "Payment Started",
+          description: "Complete your payment in the new tab to secure your pixels.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to start payment process. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
 
   return (
     <div className="w-full border-b border-border bg-card/50 p-3 space-y-4">
@@ -172,9 +230,13 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
                   <ImageIcon className="w-4 h-4 mr-2" />
                   Test Image
                 </Button>
-                <Button className="glow-button">
+                <Button 
+                  className="glow-button"
+                  onClick={handlePurchase}
+                  disabled={isProcessingPayment || !formData.email || !formData.imageUrl || !formData.alt}
+                >
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Purchase for ${price.toFixed(2)}
+                  {isProcessingPayment ? "Processing..." : `Purchase for $${price.toFixed(2)}`}
                 </Button>
               </div>
             </Card>
@@ -183,7 +245,7 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <ImageIcon className="w-4 h-4" />
-              <span>Hold Shift and drag to select pixel areas • Minimum 10x10 pixels ($100)</span>
+              <span>Hold Shift and drag to select pixel areas • Minimum 100 pixels ($100)</span>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
