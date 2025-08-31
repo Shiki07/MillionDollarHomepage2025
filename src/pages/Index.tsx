@@ -11,10 +11,13 @@ const Index = () => {
   // Load sold pixels from database on component mount
   useEffect(() => {
     const loadSoldPixels = async () => {
+      console.log('Starting to load sold pixels...');
       try {
         // Use secure function that only returns safe, non-sensitive data
         const { data: purchases, error } = await supabase
           .rpc('get_public_pixels');
+
+        console.log('RPC call result:', { purchases, error });
 
         if (error) {
           console.error('Error loading sold pixels:', error);
