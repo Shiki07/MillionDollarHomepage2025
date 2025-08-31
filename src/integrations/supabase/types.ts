@@ -61,7 +61,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_pixels: {
+        Row: {
+          alt_text: string | null
+          amount: number | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          image_url: string | null
+          pixels: Json | null
+          website_url: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string | null
+          image_url?: string | null
+          pixels?: Json | null
+          website_url?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string | null
+          image_url?: string | null
+          pixels?: Json | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
