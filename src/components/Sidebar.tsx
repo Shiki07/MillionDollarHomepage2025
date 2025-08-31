@@ -16,9 +16,10 @@ import {
 
 interface SidebarProps {
   selectedPixels: any[];
+  onTestImage: (imageData: { imageUrl: string; url: string; alt: string }) => void;
 }
 
-export const Sidebar = ({ selectedPixels }: SidebarProps) => {
+export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
   const [formData, setFormData] = useState({
     url: '',
     imageUrl: '',
@@ -154,7 +155,23 @@ export const Sidebar = ({ selectedPixels }: SidebarProps) => {
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex justify-end gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    if (formData.imageUrl) {
+                      onTestImage({
+                        imageUrl: formData.imageUrl,
+                        url: formData.url,
+                        alt: formData.alt || 'Test image'
+                      });
+                    }
+                  }}
+                  disabled={!formData.imageUrl}
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  Test Image
+                </Button>
                 <Button className="glow-button">
                   <CreditCard className="w-4 h-4 mr-2" />
                   Purchase for ${price.toFixed(2)}
