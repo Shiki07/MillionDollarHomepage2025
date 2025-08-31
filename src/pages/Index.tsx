@@ -25,6 +25,7 @@ const Index = () => {
       owner: "test-user"
     };
     
+    // Add the test pixel and immediately clear selection to show the image
     setSoldPixelsWithContent(prev => [...prev, testPixel]);
     setSelectedPixels([]);
   };
