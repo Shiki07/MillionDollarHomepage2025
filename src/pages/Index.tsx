@@ -5,8 +5,9 @@ import { Sidebar } from "@/components/Sidebar";
 const Index = () => {
   const [selectedPixels, setSelectedPixels] = useState([]);
   
-  // Empty sold pixels - no demo content
-  const [soldPixelsWithContent, setSoldPixelsWithContent] = useState([]);
+// Empty sold pixels - no demo content
+const [soldPixelsWithContent, setSoldPixelsWithContent] = useState([]);
+const [clearSelectionKey, setClearSelectionKey] = useState(0);
 
   const handleTestImage = (imageData: { imageUrl: string; url: string; alt: string }) => {
     if (selectedPixels.length === 0) return;
@@ -25,9 +26,10 @@ const Index = () => {
       owner: "test-user"
     };
     
-    // Add the test pixel and immediately clear selection to show the image
-    setSoldPixelsWithContent(prev => [...prev, testPixel]);
-    setSelectedPixels([]);
+// Add the test pixel and immediately clear selection to show the image
+setSoldPixelsWithContent(prev => [...prev, testPixel]);
+setSelectedPixels([]);
+setClearSelectionKey((k) => k + 1);
   };
 
   return (
@@ -37,6 +39,7 @@ const Index = () => {
         <PixelGrid 
           onPixelSelect={setSelectedPixels} 
           soldPixelsWithContent={soldPixelsWithContent}
+          clearSelectionKey={clearSelectionKey}
         />
       </div>
     </div>

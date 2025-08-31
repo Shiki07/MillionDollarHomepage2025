@@ -19,9 +19,10 @@ interface PixelData {
 interface PixelGridProps {
   onPixelSelect?: (pixels: PixelData[]) => void;
   soldPixelsWithContent?: PixelData[];
+  clearSelectionKey?: number;
 }
 
-export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [] }: PixelGridProps) => {
+export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [], clearSelectionKey }: PixelGridProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1.0); // Start at 100% zoom
@@ -34,8 +35,17 @@ export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [] }: PixelGr
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [loadedImages, setLoadedImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
-  // Sample sold pixels for demo - now using soldPixelsWithContent prop
-  const soldPixels = soldPixelsWithContent;
+// Sample sold pixels for demo - now using soldPixelsWithContent prop
+const soldPixels = soldPixelsWithContent;
+
+// Clear internal selection when requested by parent
+useEffect(() => {
+  if (clearSelectionKey !== undefined) {
+    setSelectedPixels([]);
+    setIsSelecting(false);
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [clearSelectionKey]);
 
   // Load images for sold pixels
   useEffect(() => {
