@@ -446,13 +446,19 @@ export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [] }: PixelGr
         {/* Live selection indicator - only shows during active selection */}
         {isSelecting && selectedPixels.length > 0 && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 glass-card px-4 py-2 border-2 border-accent">
-            <div className="text-sm font-semibold text-accent">
-              Selecting: <span className="font-mono">
-                {selectedPixels.reduce((sum, p) => sum + (p.width * p.height), 0).toLocaleString()} pixels
-              </span>
-              <span className="text-muted-foreground ml-2">
-                (${selectedPixels.reduce((sum, p) => sum + (p.width * p.height), 0).toLocaleString()})
-              </span>
+            <div className="text-sm font-semibold text-accent space-y-1">
+              <div className="flex items-center gap-4">
+                <span>Width: <span className="font-mono">{selectedPixels[0]?.width || 0}px</span></span>
+                <span>Height: <span className="font-mono">{selectedPixels[0]?.height || 0}px</span></span>
+              </div>
+              <div className="text-center">
+                Total: <span className="font-mono">
+                  {selectedPixels.reduce((sum, p) => sum + (p.width * p.height), 0).toLocaleString()} pixels
+                </span>
+                <span className="text-muted-foreground ml-2">
+                  (${selectedPixels.reduce((sum, p) => sum + (p.width * p.height), 0).toLocaleString()})
+                </span>
+              </div>
             </div>
           </div>
         )}
