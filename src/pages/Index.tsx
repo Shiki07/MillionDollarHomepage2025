@@ -12,9 +12,10 @@ const Index = () => {
   useEffect(() => {
     const loadSoldPixels = async () => {
       try {
+        // Only select non-sensitive columns - NEVER select email!
         const { data: purchases, error } = await supabase
           .from('pixel_purchases')
-          .select('*')
+          .select('id, image_url, website_url, alt_text, pixels, created_at')
           .eq('status', 'paid');
 
         if (error) {
@@ -35,7 +36,7 @@ const Index = () => {
               url: purchase.website_url,
               alt: purchase.alt_text,
               sold: true,
-              owner: purchase.email
+              owner: "Anonymous" // Never expose actual email addresses
             };
           });
           
