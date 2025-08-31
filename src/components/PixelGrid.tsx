@@ -234,8 +234,10 @@ useEffect(() => {
     );
     
     if (clickedPixel && clickedPixel.url && !e.shiftKey) {
-      // Open URL in new tab
-      window.open(clickedPixel.url, '_blank');
+      // Security: Validate URL and prevent tabnapping
+      if (clickedPixel.url.startsWith('http://') || clickedPixel.url.startsWith('https://')) {
+        window.open(clickedPixel.url, '_blank', 'noopener,noreferrer');
+      }
       return;
     }
     

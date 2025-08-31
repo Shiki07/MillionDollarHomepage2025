@@ -79,9 +79,18 @@ serve(async (req) => {
       status: updatedPurchase.status 
     });
 
+    // Security: Return only safe, non-sensitive data
     return new Response(JSON.stringify({ 
       success: isPaymentSuccessful,
-      purchase: updatedPurchase,
+      purchase: {
+        id: updatedPurchase.id,
+        image_url: updatedPurchase.image_url,
+        website_url: updatedPurchase.website_url,
+        alt_text: updatedPurchase.alt_text,
+        pixels: updatedPurchase.pixels,
+        amount: updatedPurchase.amount,
+        status: updatedPurchase.status
+      },
       sessionDetails: {
         payment_status: session.payment_status,
         status: session.status

@@ -12,11 +12,9 @@ const Index = () => {
   useEffect(() => {
     const loadSoldPixels = async () => {
       try {
-        // Only select non-sensitive columns - NEVER select email!
+        // Use secure function that only returns safe, non-sensitive data
         const { data: purchases, error } = await supabase
-          .from('pixel_purchases')
-          .select('id, image_url, website_url, alt_text, pixels, created_at')
-          .eq('status', 'paid');
+          .rpc('get_public_pixels');
 
         if (error) {
           console.error('Error loading sold pixels:', error);

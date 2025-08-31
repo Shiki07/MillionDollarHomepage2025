@@ -38,13 +38,37 @@ serve(async (req) => {
       throw new Error("Missing required fields: email, imageUrl, url, alt, pixels");
     }
 
-    logStep("Request data received", { email, pixelCount: pixels.length });
+    // Security: Validate inputs
+    if (!email.includes('@') || email.length > 254) {
+      throw new Error("Invalid email address");
+    }
+    
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      throw new Error("Website URL must be http or https");
+    }
+    
+    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:image/')) {
+      throw new Error("Image URL must be http, https, or data URL");
+    }
+    
+    if (alt.length > 200) {
+      throw new Error("Alt text too long (max 200 characters)");
+    }
+
+    // Security: Calculate actual pixel count from rectangles (prevent undercharge)
+    const totalPixelCount = pixels.reduce((total: number, pixel: any) => {
+      const width = pixel.width || 1;
+      const height = pixel.height || 1;
+      return total + (width * height);
+    }, 0);
+
+    logStep("Request data received", { pixelCount: totalPixelCount });
 
     // Calculate amount (pixels are $1 each, convert to cents)
-    const amount = pixels.length * 100; // $1 per pixel in cents
+    const amount = totalPixelCount * 100; // $1 per pixel in cents
     
-    if (amount < 1000) { // Minimum $10
-      throw new Error("Minimum purchase amount is $10 (100 pixels)");
+    if (totalPixelCount < 100) { // Minimum 100 pixels
+      throw new Error("Minimum purchase is 100 pixels ($100)");
     }
 
     // Initialize Stripe
@@ -70,8 +94,7 @@ serve(async (req) => {
       success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/`,
       metadata: {
-        email,
-        pixelCount: pixels.length.toString()
+        pixelCount: totalPixelCount.toString()
       }
     });
 
