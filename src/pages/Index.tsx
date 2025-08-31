@@ -5,33 +5,8 @@ import { Sidebar } from "@/components/Sidebar";
 const Index = () => {
   const [selectedPixels, setSelectedPixels] = useState([]);
   
-  // Sample sold pixels with content for demonstration
-  const [soldPixelsWithContent, setSoldPixelsWithContent] = useState([
-    {
-      id: "demo1",
-      x: 100,
-      y: 100,
-      width: 100,
-      height: 100,
-      imageUrl: "/placeholder.svg",
-      url: "https://lovable.dev",
-      alt: "Lovable Logo",
-      sold: true,
-      owner: "demo-user"
-    },
-    {
-      id: "demo2", 
-      x: 250,
-      y: 150,
-      width: 80,
-      height: 60,
-      imageUrl: "/placeholder.svg",
-      url: "https://github.com",
-      alt: "GitHub",
-      sold: true,
-      owner: "demo-user2"
-    }
-  ]);
+  // Empty sold pixels - no demo content
+  const [soldPixelsWithContent, setSoldPixelsWithContent] = useState([]);
 
   const handleTestImage = (imageData: { imageUrl: string; url: string; alt: string }) => {
     if (selectedPixels.length === 0) return;
