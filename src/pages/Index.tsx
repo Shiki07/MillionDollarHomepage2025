@@ -26,10 +26,9 @@ const [clearSelectionKey, setClearSelectionKey] = useState(0);
       owner: "test-user"
     };
     
-// Add the test pixel and immediately clear selection to show the image
-setSoldPixelsWithContent(prev => [...prev, testPixel]);
-setSelectedPixels([]);
-setClearSelectionKey((k) => k + 1);
+    // Add the test pixel but keep selection active so form remains visible
+    setSoldPixelsWithContent(prev => [...prev, testPixel]);
+    setClearSelectionKey((k) => k + 1);
   };
 
   return (
