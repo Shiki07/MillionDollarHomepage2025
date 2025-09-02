@@ -108,7 +108,7 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
         
         <div className="max-w-4xl mx-auto">
           <p className="text-sm leading-relaxed text-foreground/90">
-            Twenty years ago, a simple idea changed internet history. Now, as digital landscapes evolve at breakneck speed, 
+            Twenty years ago, a simple idea changed internet history. Now, as digital landscapes evolve at lightning speed, 
             <span className="font-semibold text-primary"> your company deserves more than fleeting social media posts</span>. 
             This is your chance to claim permanent digital real estate on the world's most iconic pixel canvas. 
             Whether you're a startup seeking that breakthrough moment, an established brand wanting to make a bold statement, 
