@@ -75,14 +75,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Sidebar selectedPixels={selectedPixels} onTestImage={handleTestImage} />
-      <div className="flex-1 p-1 min-h-0">
-        <PixelGrid 
-          onPixelSelect={setSelectedPixels} 
-          soldPixelsWithContent={soldPixelsWithContent}
-          clearSelectionKey={clearSelectionKey}
-        />
-      </div>
+      <header role="banner">
+        <Sidebar selectedPixels={selectedPixels} onTestImage={handleTestImage} />
+      </header>
+      <main role="main" className="flex-1 p-1 min-h-0">
+        <section aria-label="Pixel canvas for purchasing digital advertising space">
+          <PixelGrid 
+            onPixelSelect={setSelectedPixels} 
+            soldPixelsWithContent={soldPixelsWithContent}
+            clearSelectionKey={clearSelectionKey}
+          />
+        </section>
+      </main>
     </div>
   );
 };

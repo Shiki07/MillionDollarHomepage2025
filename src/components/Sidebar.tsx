@@ -95,7 +95,7 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
       {/* Title and Description */}
       <div className="text-center space-y-3">
         <div className="flex items-center justify-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center" aria-hidden="true">
             <DollarSign className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
@@ -173,8 +173,9 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
                     <div className="mt-2">
                       <img 
                         src={formData.imageUrl} 
-                        alt="Preview" 
+                        alt={formData.alt || "Image preview for pixel placement"} 
                         className="w-20 h-20 object-cover rounded border"
+                        loading="lazy"
                       />
                     </div>
                   )}
