@@ -77,6 +77,10 @@ export type Database = {
           website_url: string
         }[]
       }
+      is_service_role: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
