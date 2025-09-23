@@ -33,7 +33,9 @@ export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [], clearSele
   const [selectionStart, setSelectionStart] = useState({ x: 0, y: 0 });
   const [selectedPixels, setSelectedPixels] = useState<PixelData[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
   const [loadedImages, setLoadedImages] = useState<Map<string, HTMLImageElement>>(new Map());
+  const cachedRectRef = useRef<DOMRect | null>(null);
 
 // Sample sold pixels for demo - now using soldPixelsWithContent prop
 const soldPixels = soldPixelsWithContent;
@@ -119,15 +121,11 @@ useEffect(() => {
       return;
     }
 
-    // Ensure canvas drawing buffer matches CSS size to prevent stretching
-    const container = containerRef.current;
-    if (container) {
-      const desiredWidth = container.clientWidth;
-      const desiredHeight = container.clientHeight;
-      if (canvas.width !== desiredWidth || canvas.height !== desiredHeight) {
-        canvas.width = desiredWidth;
-        canvas.height = desiredHeight;
-      }
+    // Use cached container dimensions to prevent forced reflow
+    const { width: containerWidth, height: containerHeight } = containerSize;
+    if (canvas.width !== containerWidth || canvas.height !== containerHeight) {
+      canvas.width = containerWidth;
+      canvas.height = containerHeight;
     }
 
     console.log("Drawing grid with zoom:", zoom, "pan:", pan);
@@ -206,13 +204,13 @@ useEffect(() => {
 
     ctx.restore();
     console.log("Grid drawn successfully");
-  }, [zoom, pan, soldPixels, selectedPixels, loadedImages]);
+  }, [zoom, pan, soldPixels, selectedPixels, loadedImages, containerSize]);
 
   const getCanvasCoordinates = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+    if (!canvas || !cachedRectRef.current) return { x: 0, y: 0 };
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = cachedRectRef.current;
     const x = (clientX - rect.left - pan.x) / zoom;
     const y = (clientY - rect.top - pan.y) / zoom;
     
@@ -223,6 +221,11 @@ useEffect(() => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Update cached rect for accurate coordinates
+    if (canvasRef.current) {
+      cachedRectRef.current = canvasRef.current.getBoundingClientRect();
+    }
+    
     const coords = getCanvasCoordinates(e.clientX, e.clientY);
     
     // Check if clicking on a sold pixel with a URL
@@ -297,10 +300,11 @@ useEffect(() => {
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(1.0, Math.min(50, zoom * zoomFactor)); // Minimum 100% zoom
     
-    if (newZoom !== zoom && containerRef.current) {
-      const container = containerRef.current;
+    if (newZoom !== zoom) {
+      // Use cached container dimensions to prevent forced reflow
+      const { width: containerWidth, height: containerHeight } = containerSize;
       // Center horizontally, anchor at top
-      const newPanX = (container.clientWidth - GRID_SIZE * newZoom) / 2;
+      const newPanX = (containerWidth - GRID_SIZE * newZoom) / 2;
       const newPanY = Math.max(0, pan.y); // Keep top position, don't go negative
       
       setPan({ x: newPanX, y: newPanY });
@@ -316,56 +320,93 @@ useEffect(() => {
   };
 
   const zoomToFit = () => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
+    const { width: containerWidth, height: containerHeight } = containerSize;
     const fitZoom = Math.min(
-      container.clientWidth / GRID_SIZE,
-      container.clientHeight / GRID_SIZE
+      containerWidth / GRID_SIZE,
+      containerHeight / GRID_SIZE
     ) * 0.9;
     const finalZoom = Math.max(1.0, fitZoom); // Minimum 100% zoom
     setZoom(finalZoom);
     setPan({ 
-      x: (container.clientWidth - GRID_SIZE * finalZoom) / 2,
-      y: (container.clientHeight - GRID_SIZE * finalZoom) / 2
+      x: (containerWidth - GRID_SIZE * finalZoom) / 2,
+      y: (containerHeight - GRID_SIZE * finalZoom) / 2
     });
   };
 
-  // Initialize canvas size
+  // Initialize canvas size and setup ResizeObserver for performance
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current && canvasRef.current) {
         const container = containerRef.current;
         const canvas = canvasRef.current;
         
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-        
-        setCanvasSize({
-          width: container.clientWidth,
-          height: container.clientHeight
+        // Batch DOM reads to prevent forced reflows
+        requestAnimationFrame(() => {
+          const containerWidth = container.clientWidth;
+          const containerHeight = container.clientHeight;
+          
+          // Update cached rect for coordinate calculations
+          cachedRectRef.current = canvas.getBoundingClientRect();
+          
+          canvas.width = containerWidth;
+          canvas.height = containerHeight;
+          
+          setContainerSize({ width: containerWidth, height: containerHeight });
+          setCanvasSize({ width: containerWidth, height: containerHeight });
+          
+          console.log("Canvas size updated:", containerWidth, "x", containerHeight);
+          
+          // Auto-fit the grid on initial load only
+          if (zoom === 1.0 && pan.x === 0 && pan.y === 0) {
+            const fitZoom = Math.min(
+              containerWidth / GRID_SIZE,
+              containerHeight / GRID_SIZE
+            ) * 0.9;
+            const finalZoom = Math.max(1.0, fitZoom);
+            setZoom(finalZoom);
+            setPan({ 
+              x: (containerWidth - GRID_SIZE * finalZoom) / 2,
+              y: (containerHeight - GRID_SIZE * finalZoom) / 2
+            });
+          }
         });
-        
-        console.log("Canvas size updated:", canvas.width, "x", canvas.height);
-        
-        // Auto-fit the grid on initial load only
-        if (zoom === 1.0 && pan.x === 0 && pan.y === 0) {
-          const fitZoom = Math.min(
-            container.clientWidth / GRID_SIZE,
-            container.clientHeight / GRID_SIZE
-          ) * 0.9;
-          const finalZoom = Math.max(1.0, fitZoom);
-          setZoom(finalZoom);
-          setPan({ 
-            x: (container.clientWidth - GRID_SIZE * finalZoom) / 2,
-            y: (container.clientHeight - GRID_SIZE * finalZoom) / 2
-          });
-        }
       }
     };
 
-    updateCanvasSize();
-    window.addEventListener('resize', updateCanvasSize);
-    return () => window.removeEventListener('resize', updateCanvasSize);
+    // Use ResizeObserver for efficient container size monitoring
+    let resizeObserver: ResizeObserver | null = null;
+    
+    if (containerRef.current) {
+      updateCanvasSize();
+      
+      resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          
+          // Update state with new dimensions
+          setContainerSize({ width, height });
+          setCanvasSize({ width, height });
+          
+          // Update cached rect
+          if (canvasRef.current) {
+            cachedRectRef.current = canvasRef.current.getBoundingClientRect();
+          }
+          
+          if (canvasRef.current) {
+            canvasRef.current.width = width;
+            canvasRef.current.height = height;
+          }
+        }
+      });
+      
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
   }, []); // Remove drawGrid dependency
 
   // Draw grid when dependencies change - throttled to prevent excessive rendering
