@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { PixelGrid } from "@/components/PixelGrid";
 import { Sidebar } from "@/components/Sidebar";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [selectedPixels, setSelectedPixels] = useState([]);
@@ -87,6 +88,34 @@ const Index = () => {
           />
         </section>
       </main>
+      <footer className="bg-muted/30 border-t border-border p-6">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-semibold mb-4 text-center">Explore More</h3>
+          <nav className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              About
+            </Link>
+            <Link to="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              How It Works
+            </Link>
+            <Link to="/faq" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              FAQ
+            </Link>
+            <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              Pricing
+            </Link>
+            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              Blog
+            </Link>
+            <Link to="/pixel-history" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              Pixel History
+            </Link>
+            <Link to="/digital-advertising" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
+              Digital Advertising
+            </Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 };
