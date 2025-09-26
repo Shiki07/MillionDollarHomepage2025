@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -99,9 +100,11 @@ export const Sidebar = ({ selectedPixels, onTestImage }: SidebarProps) => {
             <DollarSign className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              The Million Dollar Homepage 2025
-            </h1>
+            <Link to="/" className="block hover:opacity-80 transition-opacity">
+              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                The Million Dollar Homepage 2025
+              </h1>
+            </Link>
             <p className="text-sm text-muted-foreground">20th Anniversary Edition - 1 Million Pixels Available</p>
           </div>
         </div>
