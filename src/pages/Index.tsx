@@ -104,9 +104,6 @@ const Index = () => {
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
               Pricing
             </Link>
-            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
-              Blog
-            </Link>
             <Link to="/pixel-history" className="text-muted-foreground hover:text-foreground transition-colors text-center py-2 px-3 rounded-md hover:bg-muted/50">
               Pixel History
             </Link>
