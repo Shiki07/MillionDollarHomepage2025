@@ -10,7 +10,7 @@ import About from "./pages/About";
 import HowItWorks from "./pages/HowItWorks";
 import FAQ from "./pages/FAQ";
 import Pricing from "./pages/Pricing";
-import Blog from "./pages/Blog";
+import Support from "./pages/Support";
 import PixelHistory from "./pages/PixelHistory";
 import DigitalAdvertising from "./pages/DigitalAdvertising";
 
@@ -28,7 +28,7 @@ const App = () => (
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/pixel-history" element={<PixelHistory />} />
           <Route path="/digital-advertising" element={<DigitalAdvertising />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />

@@ -117,7 +117,7 @@ const FAQ = () => {
         },
         {
           question: "How can I contact customer support?",
-          answer: "You can reach our support team through the contact form on our website or by emailing us directly. We typically respond within 24 hours and prioritize urgent payment or technical issues."
+          answer: "You can reach our support team by emailing support@milliondollarhomepage2025.com or through the contact form on our website. We typically respond within 24 hours and prioritize urgent payment or technical issues."
         },
         {
           question: "Do you offer bulk discounts?",
