@@ -223,9 +223,11 @@ const FAQ = () => {
                 in our FAQ, don't hesitate to reach out to us directly.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Support
+                <Button variant="outline" asChild className="flex items-center gap-2">
+                  <a href="mailto:support@milliondollarhomepage2025.com">
+                    <Mail className="h-4 w-4" />
+                    support@milliondollarhomepage2025.com
+                  </a>
                 </Button>
                 <Button asChild>
                   <a href="/how-it-works">How It Works Guide</a>
