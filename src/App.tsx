@@ -11,6 +11,8 @@ import HowItWorks from "./pages/HowItWorks";
 import FAQ from "./pages/FAQ";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
+import PixelHistory from "./pages/PixelHistory";
+import DigitalAdvertising from "./pages/DigitalAdvertising";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/faq" element={<FAQ />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/pixel-history" element={<PixelHistory />} />
+          <Route path="/digital-advertising" element={<DigitalAdvertising />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
