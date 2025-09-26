@@ -88,20 +88,6 @@ const Index = () => {
           />
         </section>
       </main>
-      <section className="bg-muted/50 border-t border-border p-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h3 className="text-lg font-semibold mb-2">Need Support?</h3>
-          <p className="text-muted-foreground mb-3">
-            Have questions about purchasing pixels or need technical assistance?
-          </p>
-          <a 
-            href="mailto:support@milliondollarhomepage2025.com" 
-            className="text-primary hover:underline font-medium"
-          >
-            support@milliondollarhomepage2025.com
-          </a>
-        </div>
-      </section>
       <footer className="bg-muted/30 border-t border-border p-6">
         <div className="max-w-6xl mx-auto">
           <h3 className="text-lg font-semibold mb-4 text-center">Explore More</h3>
