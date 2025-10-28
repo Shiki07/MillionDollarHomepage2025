@@ -36,6 +36,10 @@ export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [], clearSele
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
   const [loadedImages, setLoadedImages] = useState<Map<string, HTMLImageElement>>(new Map());
   const [isOverSoldPixel, setIsOverSoldPixel] = useState(false);
+  const [hoveredPixel, setHoveredPixel] = useState<PixelData | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [showTooltip, setShowTooltip] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cachedRectRef = useRef<DOMRect | null>(null);
 
 // Sample sold pixels for demo - now using soldPixelsWithContent prop
@@ -256,15 +260,49 @@ useEffect(() => {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Track mouse position for tooltip
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMousePosition({ 
+        x: e.clientX - rect.left, 
+        y: e.clientY - rect.top 
+      });
+    }
+    
     // Check if hovering over a sold pixel
     const coords = getCanvasCoordinates(e.clientX, e.clientY);
-    const overSoldPixel = soldPixels.some(pixel => 
+    const foundPixel = soldPixels.find(pixel => 
       coords.x >= pixel.x && 
       coords.x <= pixel.x + pixel.width &&
       coords.y >= pixel.y && 
       coords.y <= pixel.y + pixel.height
     );
-    setIsOverSoldPixel(overSoldPixel);
+    
+    setIsOverSoldPixel(!!foundPixel);
+    
+    // Handle tooltip display with delay
+    if (foundPixel && foundPixel.alt) {
+      if (hoveredPixel?.id !== foundPixel.id) {
+        // Clear previous timeout if hovering over a different pixel
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+        }
+        setShowTooltip(false);
+        setHoveredPixel(foundPixel);
+        
+        // Set new timeout for tooltip
+        hoverTimeoutRef.current = setTimeout(() => {
+          setShowTooltip(true);
+        }, 1000); // 1 second delay
+      }
+    } else {
+      // Clear timeout and hide tooltip when not over a pixel
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+      setShowTooltip(false);
+      setHoveredPixel(null);
+    }
     
     if (isDragging) {
       setPan({
@@ -549,6 +587,21 @@ useEffect(() => {
             Zoom: <span className="font-mono text-primary">{Math.round(zoom * 100)}%</span>
           </div>
         </div>
+
+        {/* Alt text tooltip */}
+        {showTooltip && hoveredPixel?.alt && (
+          <div 
+            className="absolute glass-card p-3 border border-primary/20 shadow-lg max-w-xs pointer-events-none z-50"
+            style={{
+              left: `${mousePosition.x + 15}px`,
+              top: `${mousePosition.y + 15}px`,
+            }}
+          >
+            <div className="text-sm text-foreground break-words">
+              {hoveredPixel.alt}
+            </div>
+          </div>
+        )}
       </div>
     </Card>
     </div>
