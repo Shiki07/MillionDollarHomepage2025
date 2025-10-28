@@ -35,6 +35,7 @@ export const PixelGrid = ({ onPixelSelect, soldPixelsWithContent = [], clearSele
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
   const [loadedImages, setLoadedImages] = useState<Map<string, HTMLImageElement>>(new Map());
+  const [isOverSoldPixel, setIsOverSoldPixel] = useState(false);
   const cachedRectRef = useRef<DOMRect | null>(null);
 
 // Sample sold pixels for demo - now using soldPixelsWithContent prop
@@ -255,13 +256,22 @@ useEffect(() => {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Check if hovering over a sold pixel
+    const coords = getCanvasCoordinates(e.clientX, e.clientY);
+    const overSoldPixel = soldPixels.some(pixel => 
+      coords.x >= pixel.x && 
+      coords.x <= pixel.x + pixel.width &&
+      coords.y >= pixel.y && 
+      coords.y <= pixel.y + pixel.height
+    );
+    setIsOverSoldPixel(overSoldPixel);
+    
     if (isDragging) {
       setPan({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y,
       });
     } else if (isSelecting) {
-      const coords = getCanvasCoordinates(e.clientX, e.clientY);
       const selection = {
         x: Math.min(selectionStart.x, coords.x),
         y: Math.min(selectionStart.y, coords.y),
@@ -492,7 +502,7 @@ useEffect(() => {
             width: '100%', 
             height: '100%',
             imageRendering: 'pixelated',
-            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : 'grab'
+            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : isOverSoldPixel ? 'default' : 'grab'
           }}
         />
         
