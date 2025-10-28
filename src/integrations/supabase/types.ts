@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -65,7 +65,7 @@ export type Database = {
     }
     Functions: {
       get_public_pixels: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           alt_text: string
           amount: number
@@ -77,10 +77,7 @@ export type Database = {
           website_url: string
         }[]
       }
-      is_service_role: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_service_role: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
