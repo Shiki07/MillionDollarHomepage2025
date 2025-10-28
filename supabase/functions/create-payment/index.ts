@@ -81,10 +81,10 @@ serve(async (req) => {
         {
           price_data: {
             currency: "usd",
-            product_data: { 
-              name: `Million Dollar Homepage - ${pixels.length} Pixels`,
-              description: `Purchase ${pixels.length} pixels for your advertisement`
-            },
+        product_data: { 
+          name: `Million Dollar Homepage - ${totalPixelCount} Pixels`,
+          description: `Purchase ${totalPixelCount} pixels for your advertisement`
+        },
             unit_amount: amount,
           },
           quantity: 1,
