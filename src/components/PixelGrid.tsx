@@ -502,7 +502,7 @@ useEffect(() => {
             width: '100%', 
             height: '100%',
             imageRendering: 'pixelated',
-            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : isOverSoldPixel ? 'default' : 'grab'
+            cursor: isDragging ? 'grabbing' : isSelecting ? 'crosshair' : isOverSoldPixel ? 'pointer' : 'grab'
           }}
         />
         
